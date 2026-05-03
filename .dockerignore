@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+dist
+**/dist
+.nuxt
+**/.nuxt
+.output
+**/.output
+.env
+.env.*
+!.env.example
+.history
+backups
+logs
+*.log
+.git
+.DS_Store

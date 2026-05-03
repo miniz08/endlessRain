@@ -1,0 +1,10 @@
+node_modules
+.nuxt
+.output
+dist
+.env
+.env.*
+*.log
+npm-debug.log*
+.DS_Store
+.history

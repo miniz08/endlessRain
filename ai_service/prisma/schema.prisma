@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id              Int       @id @default(autoincrement())
+  username        String    @unique
+  email           String    @unique
+  password        String
+  avatar          String?
+  role            String    @default("user")
+  professionalism Int       @default(0)
+  friendliness    Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now())
+  article         article[]
+}
+
+model article {
+  id                        Int                         @id @default(autoincrement())
+  content                   String                      @db.LongText
+  tag                       String
+  posttime                  DateTime                    @default(now())
+  authorId                  Int
+  user                      user                        @relation(fields: [authorId], references: [id])
+  article_ai_analysis       article_ai_analysis?
+  article_ai_tag_on_article article_ai_tag_on_article[]
+
+  @@index([authorId])
+}
+
+model article_ai_analysis {
+  id                   Int      @id @default(autoincrement())
+  articleId            Int      @unique
+  friendlinessScore    Int
+  rationalityScore     Int
+  legalityScore        Int
+  professionalismScore Int
+  analyzedAt           DateTime @default(now())
+  article              article  @relation(fields: [articleId], references: [id])
+}
+
+model article_ai_tag {
+  id                        Int                         @id @default(autoincrement())
+  name                      String                      @unique
+  createdAt                 DateTime                    @default(now())
+  article_ai_tag_on_article article_ai_tag_on_article[]
+}
+
+model article_ai_tag_on_article {
+  articleId      Int
+  tagId          Int
+  confidence     Float?         @db.Float
+  weight         Float?         @db.Float
+  createdAt      DateTime       @default(now())
+  article        article        @relation(fields: [articleId], references: [id])
+  article_ai_tag article_ai_tag @relation(fields: [tagId], references: [id])
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+}
+
+model audit_log {
+  id         BigInt   @id @default(autoincrement())
+  requestId  String   @db.VarChar(128)
+  userId     Int?
+  username   String?  @db.VarChar(128)
+  role       String?  @db.VarChar(32)
+  ipAddress  String?  @db.VarChar(64)
+  method     String   @db.VarChar(16)
+  route      String   @db.VarChar(512)
+  action     String   @db.VarChar(128)
+  result     String   @db.VarChar(16)
+  statusCode Int
+  detail     String?  @db.VarChar(1024)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([requestId])
+  @@index([result])
+  @@index([userId])
+}

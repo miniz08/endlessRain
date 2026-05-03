@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id                                    Int            @id @default(autoincrement())
+  username                              String         @unique
+  email                                 String         @unique
+  password                              String
+  avatar                                String?
+  role                                  String         @default("user")
+  professionalism                       Int            @default(0)
+  friendliness                          Int            @default(0)
+  createdAt                             DateTime       @default(now())
+  updatedAt                             DateTime       @default(now())
+  chat_message                          chat_message[]
+  chat_thread_chat_thread_userAIdTouser chat_thread[]  @relation("chat_thread_userAIdTouser")
+  chat_thread_chat_thread_userBIdTouser chat_thread[]  @relation("chat_thread_userBIdTouser")
+}
+
+model chat_message {
+  id          Int         @id @default(autoincrement())
+  threadId    Int
+  senderId    Int
+  content     String      @db.LongText
+  createdAt   DateTime    @default(now())
+  user        user        @relation(fields: [senderId], references: [id])
+  chat_thread chat_thread @relation(fields: [threadId], references: [id])
+
+  @@index([senderId])
+  @@index([threadId])
+}
+
+model chat_thread {
+  id                             Int            @id @default(autoincrement())
+  userAId                        Int
+  userBId                        Int
+  createdAt                      DateTime       @default(now())
+  chat_message                   chat_message[]
+  user_chat_thread_userAIdTouser user           @relation("chat_thread_userAIdTouser", fields: [userAId], references: [id])
+  user_chat_thread_userBIdTouser user           @relation("chat_thread_userBIdTouser", fields: [userBId], references: [id])
+
+  @@unique([userAId, userBId])
+  @@index([userBId])
+}
+
+model audit_log {
+  id         BigInt   @id @default(autoincrement())
+  requestId  String   @db.VarChar(128)
+  userId     Int?
+  username   String?  @db.VarChar(128)
+  role       String?  @db.VarChar(32)
+  ipAddress  String?  @db.VarChar(64)
+  method     String   @db.VarChar(16)
+  route      String   @db.VarChar(512)
+  action     String   @db.VarChar(128)
+  result     String   @db.VarChar(16)
+  statusCode Int
+  detail     String?  @db.VarChar(1024)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([requestId])
+  @@index([result])
+  @@index([userId])
+}

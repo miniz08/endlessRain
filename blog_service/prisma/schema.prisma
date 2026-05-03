@@ -1,0 +1,273 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id                                  Int                @id @default(autoincrement())
+  username                            String             @unique
+  email                               String             @unique
+  password                            String
+  avatar                              String?
+  role                                String             @default("user")
+  professionalism                     Int                @default(0)
+  friendliness                        Int                @default(0)
+  createdAt                           DateTime           @default(now())
+  updatedAt                           DateTime           @default(now())
+  article                             article[]
+  article_reaction                    article_reaction[]
+  comment_comment_replyToUserIdTouser comment[]          @relation("comment_replyToUserIdTouser")
+  comment_comment_userIdTouser        comment[]          @relation("comment_userIdTouser")
+  comment_reaction                    comment_reaction[]
+  follow_follow_followerIdTouser      follow[]           @relation("follow_followerIdTouser")
+  follow_follow_followingIdTouser     follow[]           @relation("follow_followingIdTouser")
+}
+
+model article {
+  id                        Int                         @id @default(autoincrement())
+  content                   String                      @db.LongText
+  tag                       String
+  posttime                  DateTime                    @default(now())
+  authorId                  Int
+  user                      user                        @relation(fields: [authorId], references: [id])
+  article_ai_analysis       article_ai_analysis?
+  article_ai_tag_on_article article_ai_tag_on_article[]
+  article_reaction          article_reaction[]
+  article_tag_on_article    article_tag_on_article[]
+  comment                   comment[]
+
+  @@index([authorId])
+}
+
+model article_ai_analysis {
+  id                   Int      @id @default(autoincrement())
+  articleId            Int      @unique
+  friendlinessScore    Int
+  rationalityScore     Int
+  legalityScore        Int
+  professionalismScore Int
+  analyzedAt           DateTime @default(now())
+  article              article  @relation(fields: [articleId], references: [id])
+}
+
+model article_ai_tag {
+  id                        Int                         @id @default(autoincrement())
+  name                      String                      @unique
+  createdAt                 DateTime                    @default(now())
+  article_ai_tag_on_article article_ai_tag_on_article[]
+}
+
+model article_ai_tag_on_article {
+  articleId      Int
+  tagId          Int
+  confidence     Float?         @db.Float
+  weight         Float?         @db.Float
+  createdAt      DateTime       @default(now())
+  article        article        @relation(fields: [articleId], references: [id])
+  article_ai_tag article_ai_tag @relation(fields: [tagId], references: [id])
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+}
+
+model article_tag {
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @unique
+  createdAt              DateTime                 @default(now())
+  article_tag_on_article article_tag_on_article[]
+}
+
+model article_tag_on_article {
+  articleId   Int
+  tagId       Int
+  weight      Float?      @db.Float
+  createdAt   DateTime    @default(now())
+  article     article     @relation(fields: [articleId], references: [id])
+  article_tag article_tag @relation(fields: [tagId], references: [id])
+
+  @@id([articleId, tagId])
+  @@index([tagId])
+}
+
+model article_reaction {
+  id        Int      @id @default(autoincrement())
+  articleId Int
+  userId    Int
+  emoji     String
+  createdAt DateTime @default(now())
+  article   article  @relation(fields: [articleId], references: [id])
+  user      user     @relation(fields: [userId], references: [id])
+
+  @@unique([articleId, userId, emoji])
+  @@index([articleId, emoji])
+  @@index([articleId])
+  @@index([userId])
+}
+
+model comment {
+  id                               Int                @id @default(autoincrement())
+  content                          String             @db.LongText
+  posttime                         DateTime           @default(now())
+  userId                           Int
+  articleId                        Int?
+  status                           String             @default("approved")
+  parentId                         Int?
+  replyToUserId                    Int?
+  article                          article?           @relation(fields: [articleId], references: [id], map: "Comment_articleId_fkey")
+  comment                          comment?           @relation("commentTocomment", fields: [parentId], references: [id])
+  other_comment                    comment[]          @relation("commentTocomment")
+  user_comment_replyToUserIdTouser user?              @relation("comment_replyToUserIdTouser", fields: [replyToUserId], references: [id])
+  user_comment_userIdTouser        user               @relation("comment_userIdTouser", fields: [userId], references: [id])
+  comment_reaction                 comment_reaction[]
+
+  @@index([articleId], map: "Comment_articleId_fkey")
+  @@index([parentId])
+  @@index([replyToUserId])
+  @@index([userId])
+}
+
+model comment_reaction {
+  id        Int      @id @default(autoincrement())
+  commentId Int
+  userId    Int
+  emoji     String
+  createdAt DateTime @default(now())
+  comment   comment  @relation(fields: [commentId], references: [id])
+  user      user     @relation(fields: [userId], references: [id])
+
+  @@unique([commentId, userId, emoji])
+  @@index([commentId, emoji])
+  @@index([commentId])
+  @@index([userId])
+}
+
+model follow {
+  id                            Int           @id @default(autoincrement())
+  followerId                    Int
+  followingId                   Int
+  status                        follow_status @default(ACTIVE)
+  createdAt                     DateTime      @default(now())
+  updatedAt                     DateTime      @default(now())
+  user_follow_followerIdTouser  user          @relation("follow_followerIdTouser", fields: [followerId], references: [id])
+  user_follow_followingIdTouser user          @relation("follow_followingIdTouser", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+  @@index([followingId])
+}
+
+model reco_article_daily_stat {
+  articleId     Int
+  statDate      DateTime @db.Date
+  impressions   Int      @default(0)
+  clicks        Int      @default(0)
+  dwellMsSum    BigInt   @default(0)
+  completeReads Int      @default(0)
+  likes         Int      @default(0)
+  comments      Int      @default(0)
+  favorites     Int      @default(0)
+  follows       Int      @default(0)
+  hides         Int      @default(0)
+  reports       Int      @default(0)
+  qualityScore  Float    @default(0)
+  updatedAt     DateTime
+  createdAt     DateTime @default(now())
+
+  @@id([articleId, statDate])
+  @@index([statDate, impressions])
+  @@index([statDate, qualityScore])
+}
+
+model reco_event {
+  id        Int                  @id @default(autoincrement())
+  userId    Int?
+  articleId Int
+  eventType reco_event_eventType
+  dwellMs   Int?
+  position  Int?
+  scene     String               @default("home")
+  requestId String
+  sessionId String?
+  createdAt DateTime             @default(now())
+
+  @@index([articleId, createdAt])
+  @@index([eventType, createdAt])
+  @@index([requestId])
+  @@index([userId, createdAt])
+}
+
+model reco_request_log {
+  requestId      String   @id
+  userId         Int?
+  scene          String   @default("home")
+  candidateCount Int
+  resultIds      Json
+  abBucket       String?
+  createdAt      DateTime @default(now())
+
+  @@index([scene, createdAt])
+  @@index([userId, createdAt])
+}
+
+model reco_user_profile {
+  userId         Int      @id
+  tagVector      Json
+  authorAffinity Json?
+  updatedAt      DateTime
+  createdAt      DateTime @default(now())
+}
+
+model reco_user_seen {
+  userId     Int
+  articleId  Int
+  seenCount  Int      @default(1)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@id([userId, articleId])
+  @@index([articleId, lastSeenAt])
+  @@index([userId, lastSeenAt])
+}
+
+model audit_log {
+  id         BigInt   @id @default(autoincrement())
+  requestId  String   @db.VarChar(128)
+  userId     Int?
+  username   String?  @db.VarChar(128)
+  role       String?  @db.VarChar(32)
+  ipAddress  String?  @db.VarChar(64)
+  method     String   @db.VarChar(16)
+  route      String   @db.VarChar(512)
+  action     String   @db.VarChar(128)
+  result     String   @db.VarChar(16)
+  statusCode Int
+  detail     String?  @db.VarChar(1024)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([requestId])
+  @@index([result])
+  @@index([userId])
+}
+
+enum follow_status {
+  ACTIVE
+  BLOCKED
+  REMOVED
+}
+
+enum reco_event_eventType {
+  IMPRESSION
+  CLICK
+  DWELL
+  READ_COMPLETE
+  LIKE
+  COMMENT
+  FAVORITE
+  FOLLOW_AUTHOR
+  HIDE
+  REPORT
+}

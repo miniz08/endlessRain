@@ -1,0 +1,118 @@
+services:
+  api_gateway:
+    build:
+      context: ./api_gateway
+    command: npm run dev
+    volumes:
+      - ./api_gateway/src:/app/src
+    environment:
+      PORT: 3001
+      DATABASE_URL: ${DATABASE_URL}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-longseason-dev-access-token-secret}
+      JWT_SECRET: ${JWT_SECRET:-longseason-dev-access-token-secret}
+      USER_SERVICE_URL: http://user_service:3003
+      BLOG_SERVICE_URL: http://blog_service:3002
+      AI_SERVICE_URL: http://ai_service:3004
+      CHAT_SERVICE_URL: http://chat_service:3005
+      CORS_ORIGIN: "true"
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-1000}
+    ports:
+      - "${DEV_GATEWAY_PORT:-13001}:3001"
+    depends_on:
+      - user_service
+      - blog_service
+      - ai_service
+      - chat_service
+
+  user_service:
+    build:
+      context: ./user_service
+    command: npm run dev
+    volumes:
+      - ./user_service/index.ts:/app/index.ts
+      - ./user_service/src:/app/src
+      - ./user_service/lib:/app/lib
+      - ./user_service/middlewares:/app/middlewares
+    environment:
+      PORT: 3003
+      DATABASE_URL: ${DATABASE_URL}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-longseason-dev-access-token-secret}
+      CORS_ORIGIN: "true"
+    ports:
+      - "${DEV_USER_PORT:-13003}:3003"
+
+  blog_service:
+    build:
+      context: ./blog_service
+    command: npm run dev
+    volumes:
+      - ./blog_service/src:/app/src
+      - ./blog_service/lib:/app/lib
+      - ./blog_service/middlewares:/app/middlewares
+    environment:
+      PORT: 3002
+      DATABASE_URL: ${DATABASE_URL}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-longseason-dev-access-token-secret}
+      AI_SERVICE_URL: http://ai_service:3004
+      AI_INTERNAL_TOKEN: ${AI_INTERNAL_TOKEN:-longseason-dev-ai-internal-token}
+      AI_ANALYSIS_ON_CREATE: "${AI_ANALYSIS_ON_CREATE:-true}"
+      CORS_ORIGIN: "true"
+    ports:
+      - "${DEV_BLOG_PORT:-13002}:3002"
+    depends_on:
+      - ai_service
+
+  ai_service:
+    build:
+      context: ./ai_service
+    command: npm run dev
+    volumes:
+      - ./ai_service/src:/app/src
+      - ./ai_service/lib:/app/lib
+      - ./ai_service/middlewares:/app/middlewares
+    environment:
+      PORT: 3004
+      DATABASE_URL: ${DATABASE_URL}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.siliconflow.cn/v1}
+      AI_CHAT_PATH: ${AI_CHAT_PATH:-/chat/completions}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-Qwen/QwQ-32B}
+      AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-20000}
+      AI_RETRY_COUNT: ${AI_RETRY_COUNT:-1}
+      AI_INTERNAL_TOKEN: ${AI_INTERNAL_TOKEN:-longseason-dev-ai-internal-token}
+      CORS_ORIGIN: "true"
+    ports:
+      - "${DEV_AI_PORT:-13004}:3004"
+
+  chat_service:
+    build:
+      context: ./chat_service
+    command: npm run dev
+    volumes:
+      - ./chat_service/src:/app/src
+      - ./chat_service/prisma:/app/prisma
+    environment:
+      PORT: 3005
+      DATABASE_URL: ${DATABASE_URL}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-longseason-dev-access-token-secret}
+      CORS_ORIGIN: "true"
+    ports:
+      - "${DEV_CHAT_PORT:-13005}:3005"
+
+  frontend:
+    build:
+      context: ./mofukaze
+      target: build
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+    volumes:
+      - ./mofukaze:/app
+      - /app/node_modules
+    environment:
+      NUXT_PUBLIC_API_BASE: /api
+      NUXT_PUBLIC_WS_BASE: ${NUXT_PUBLIC_WS_BASE:-}
+      NUXT_API_PROXY_TARGET: http://api_gateway:3001
+    ports:
+      - "${DEV_FRONTEND_PORT:-13000}:3000"
+    depends_on:
+      - api_gateway

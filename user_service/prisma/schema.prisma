@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id                 Int                  @id @default(autoincrement())
+  username           String               @unique
+  email              String               @unique
+  password           String
+  avatar             String?
+  role               String               @default("user")
+  professionalism    Int                  @default(0)
+  friendliness       Int                  @default(0)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @default(now())
+  auth_refresh_token auth_refresh_token[]
+}
+
+model auth_refresh_token {
+  id                  BigInt    @id @default(autoincrement())
+  userId              Int
+  tokenHash           String    @unique @db.Char(64)
+  csrfToken           String    @db.Char(64)
+  expiresAt           DateTime
+  createdAt           DateTime  @default(now())
+  revokedAt           DateTime?
+  replacedByTokenHash String?   @db.Char(64)
+  userAgent           String?   @db.VarChar(255)
+  ipAddress           String?   @db.VarChar(64)
+  user                user      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Restrict)
+
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@index([userId])
+}
+
+model audit_log {
+  id         BigInt   @id @default(autoincrement())
+  requestId  String   @db.VarChar(128)
+  userId     Int?
+  username   String?  @db.VarChar(128)
+  role       String?  @db.VarChar(32)
+  ipAddress  String?  @db.VarChar(64)
+  method     String   @db.VarChar(16)
+  route      String   @db.VarChar(512)
+  action     String   @db.VarChar(128)
+  result     String   @db.VarChar(16)
+  statusCode Int
+  detail     String?  @db.VarChar(1024)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([requestId])
+  @@index([result])
+  @@index([userId])
+}

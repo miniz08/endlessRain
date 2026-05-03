@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model audit_log {
+  id         BigInt   @id @default(autoincrement())
+  requestId  String   @db.VarChar(128)
+  userId     Int?
+  username   String?  @db.VarChar(128)
+  role       String?  @db.VarChar(32)
+  ipAddress  String?  @db.VarChar(64)
+  method     String   @db.VarChar(16)
+  route      String   @db.VarChar(512)
+  action     String   @db.VarChar(128)
+  result     String   @db.VarChar(16)
+  statusCode Int
+  detail     String?  @db.VarChar(1024)
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([requestId])
+  @@index([result])
+  @@index([userId])
+}
