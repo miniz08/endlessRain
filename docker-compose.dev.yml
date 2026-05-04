@@ -2,6 +2,7 @@ services:
   api_gateway:
     build:
       context: ./api_gateway
+      target: build
     command: npm run dev
     volumes:
       - ./api_gateway/src:/app/src
@@ -27,6 +28,7 @@ services:
   user_service:
     build:
       context: ./user_service
+      target: build
     command: npm run dev
     volumes:
       - ./user_service/index.ts:/app/index.ts
@@ -44,6 +46,7 @@ services:
   blog_service:
     build:
       context: ./blog_service
+      target: build
     command: npm run dev
     volumes:
       - ./blog_service/src:/app/src
@@ -65,6 +68,7 @@ services:
   ai_service:
     build:
       context: ./ai_service
+      target: build
     command: npm run dev
     volumes:
       - ./ai_service/src:/app/src
@@ -88,6 +92,7 @@ services:
   chat_service:
     build:
       context: ./chat_service
+      target: build
     command: npm run dev
     volumes:
       - ./chat_service/src:/app/src

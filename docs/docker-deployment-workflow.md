@@ -318,6 +318,24 @@ docker compose --project-name longseason-ai-social-dev -f docker-compose.dev.yml
 docker compose --project-name longseason-ai-social-dev -f docker-compose.dev.yml logs -f blog_service
 ```
 
+如果 `up -d` 显示 `Started`，但后端服务马上退出，先看完整状态：
+
+```bash
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml ps -a
+```
+
+再看具体服务日志：
+
+```bash
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml logs --tail=100 api_gateway
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml logs --tail=100 user_service
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml logs --tail=100 blog_service
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml logs --tail=100 ai_service
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml logs --tail=100 chat_service
+```
+
+开发模式下后端服务会执行 `npm run dev`，因此 `docker-compose.dev.yml` 明确使用各 Dockerfile 的 `build` 阶段。这个阶段包含 `tsx`、`typescript`、`prisma` 等开发依赖；生产模式仍使用最终运行阶段，只保留生产依赖。
+
 停止：
 
 ```bash
