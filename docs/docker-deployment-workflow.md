@@ -336,6 +336,13 @@ docker compose --env-file .env --project-name longseason-ai-social-dev -f docker
 
 开发模式下后端服务会执行 `npm run dev`，因此 `docker-compose.dev.yml` 明确使用各 Dockerfile 的 `build` 阶段。这个阶段包含 `tsx`、`typescript`、`prisma` 等开发依赖；生产模式仍使用最终运行阶段，只保留生产依赖。
 
+如果前端页面路由出现 `502 Bad Gateway`，尤其是 `/login`、`/register` 这类 Nuxt 页面路由，通常是开发容器中的 `.nuxt` 或 `.output` 生成目录状态异常。当前 dev compose 已将 `/app/.nuxt` 和 `/app/.output` 设置为容器内部匿名卷，更新后建议执行一次：
+
+```bash
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml down -v
+docker compose --env-file .env --project-name longseason-ai-social-dev -f docker-compose.dev.yml up -d --build --force-recreate
+```
+
 停止：
 
 ```bash
@@ -380,3 +387,65 @@ docker compose --env-file .env --project-name longseason-ai-social up -d --build
 ```
 
 因此不会与已有博客应用冲突。
+
+## 9. Nginx 入口与代理前缀说明
+
+本项目和已有博客应用都可以使用 `/api/` 作为内部 API 前缀，前提是它们的外部入口不同。
+
+例如当前开发模式：
+
+```text
+博客应用: http://服务器IP:80/api/...
+本项目:   http://服务器IP:13000/api/...
+```
+
+这两个 `/api/` 不会冲突，因为浏览器先按端口进入不同的前端服务。进入本项目后，请求链路是：
+
+```text
+浏览器 -> 服务器IP:13000 -> Nuxt dev server -> /api -> api_gateway:3001 -> user/blog/ai/chat service
+```
+
+生产模式默认链路是：
+
+```text
+浏览器 -> 服务器IP:800 -> frontend Nginx -> /api -> api_gateway:3001 -> user/blog/ai/chat service
+```
+
+需要避免的是：把两个应用挂在同一个外层 Nginx 的同一个 `server_name`、同一个端口、同一个 `location /api/` 下。例如同一个 `mofukaze.me:80` 里不能同时让：
+
+```text
+location /api/ -> 博客 api_gateway
+location /api/ -> 本项目 api_gateway
+```
+
+如果以后要用域名统一入口，推荐使用子域名或不同 location 前缀。
+
+推荐方案一：子域名，最清晰。
+
+```nginx
+server {
+    listen 80;
+    server_name social.mofukaze.me;
+
+    location / {
+        proxy_pass http://127.0.0.1:800;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+这时外层 Nginx 只代理到本项目 frontend 宿主机端口 `800`，本项目自己的 frontend Nginx 再处理 `/api/` 到内部 `api_gateway`。
+
+推荐方案二：只在开发验证时直接用端口。
+
+```text
+http://服务器IP:13000
+```
+
+这种方式不经过已有博客的 Nginx 配置，因此已有博客的 `/api/`、`/img/`、`/frontend/` 等 location 不会影响本项目。
+
+不推荐在同一个域名下用 `/social/` 子路径承载本项目，除非同时改 Nuxt app baseURL、API base、cookie path 和 Nginx rewrite；这会引入额外复杂度，不适合作为当前答辩部署路径。

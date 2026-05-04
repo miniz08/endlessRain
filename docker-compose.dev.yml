@@ -113,6 +113,8 @@ services:
     volumes:
       - ./mofukaze:/app
       - /app/node_modules
+      - /app/.nuxt
+      - /app/.output
     environment:
       NUXT_PUBLIC_API_BASE: /api
       NUXT_PUBLIC_WS_BASE: ${NUXT_PUBLIC_WS_BASE:-}

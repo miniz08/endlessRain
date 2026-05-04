@@ -28,6 +28,9 @@
       <NuxtLink to="/login">
         <button class="primary">登录</button>
       </NuxtLink>
+      <NuxtLink to="/register">
+        <button>注册</button>
+      </NuxtLink>
     </div>
 
     <p v-if="error" class="error">{{ error }}</p>

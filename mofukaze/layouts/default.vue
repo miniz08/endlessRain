@@ -9,6 +9,7 @@
           <NuxtLink v-if="user" to="/chat">私信</NuxtLink>
           <NuxtLink v-if="isOperator" to="/ops">运维</NuxtLink>
           <NuxtLink v-if="!user" to="/login">登录</NuxtLink>
+          <NuxtLink v-if="!user" to="/register">注册</NuxtLink>
           <button v-else class="ghost" @click="logout">退出</button>
         </nav>
       </div>

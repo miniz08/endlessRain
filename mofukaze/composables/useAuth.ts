@@ -26,6 +26,16 @@ export function useAuth() {
     return payload.user;
   }
 
+  async function register(input: { username: string; email: string; password: string }) {
+    const payload = await userApi<{ user: PublicUser }>("/auth/register", {
+      method: "POST",
+      body: input,
+    });
+    user.value = payload.user;
+    ready.value = true;
+    return payload.user;
+  }
+
   async function logout() {
     await userApi("/auth/logout", { method: "POST" }).catch(() => undefined);
     user.value = null;
@@ -37,6 +47,7 @@ export function useAuth() {
     isLoggedIn: computed(() => Boolean(user.value)),
     refreshMe,
     login,
+    register,
     logout,
   };
 }

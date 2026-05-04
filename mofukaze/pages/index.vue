@@ -31,9 +31,14 @@
         <div class="panel">
           <h3>{{ user ? user.username : "未登录" }}</h3>
           <p class="muted">登录后可查看关注流、使用 reaction、评论，并让系统学习你的内容偏好。</p>
-          <NuxtLink v-if="!user" to="/login">
-            <button class="primary">去登录</button>
-          </NuxtLink>
+          <div v-if="!user" class="row">
+            <NuxtLink to="/login">
+              <button class="primary">去登录</button>
+            </NuxtLink>
+            <NuxtLink to="/register">
+              <button>注册</button>
+            </NuxtLink>
+          </div>
           <NuxtLink v-else :to="`/u/${user.id}`">
             <button>查看主页</button>
           </NuxtLink>
