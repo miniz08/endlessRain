@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import type { audit_log } from "@prisma/client";
 import { gatewayRoutes, routeTarget, type GatewayRoute } from "./config/routes.js";
 import { prisma } from "./lib/prisma.js";
 
@@ -113,7 +114,7 @@ export async function auditLogsController(req: Request, res: Response): Promise<
   const action = typeof req.query.action === "string" ? req.query.action : undefined;
 
   try {
-    const rows = await prisma.audit_log.findMany({
+    const rows: audit_log[] = await prisma.audit_log.findMany({
       where: {
         ...(Number.isInteger(userId) && userId! > 0 ? { userId } : {}),
         ...(result ? { result } : {}),
