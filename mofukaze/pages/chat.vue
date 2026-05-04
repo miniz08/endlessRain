@@ -29,7 +29,7 @@
             @click="openThread(thread)"
           >
             <span class="avatar">
-              <img v-if="thread.counterpart.avatar" :src="thread.counterpart.avatar" alt="" />
+              <img v-if="avatarUrl(thread.counterpart.avatar)" :src="avatarUrl(thread.counterpart.avatar)" alt="" />
               <span v-else>{{ thread.counterpart.username.slice(0, 1).toUpperCase() }}</span>
             </span>
             <span>
@@ -45,7 +45,7 @@
         <template v-else>
           <div class="row chat-title">
             <span class="avatar">
-              <img v-if="activeThread.counterpart.avatar" :src="activeThread.counterpart.avatar" alt="" />
+              <img v-if="avatarUrl(activeThread.counterpart.avatar)" :src="avatarUrl(activeThread.counterpart.avatar)" alt="" />
               <span v-else>{{ activeThread.counterpart.username.slice(0, 1).toUpperCase() }}</span>
             </span>
             <div>
@@ -75,15 +75,15 @@
                 v-for="emoji in emojis"
                 :key="emoji"
                 type="button"
-                :class="{ primary: selectedEmoji === emoji }"
-                @click="selectedEmoji = selectedEmoji === emoji ? '' : emoji"
+                :title="`插入 ${emoji}`"
+                @click="insertEmoji(emoji)"
               >
                 {{ emoji }}
               </button>
             </div>
             <div class="inline-form">
-              <input v-model="draft" maxlength="5000" placeholder="输入消息" />
-              <button class="primary" :disabled="sending || (!draft.trim() && !selectedEmoji)">
+              <input ref="draftInput" v-model="draft" maxlength="5000" placeholder="输入消息" />
+              <button class="primary" :disabled="sending || !draft.trim()">
                 {{ sending ? "发送中" : "发送" }}
               </button>
             </div>
@@ -106,7 +106,7 @@ const activeThread = ref<ChatThread | null>(null);
 const messages = ref<ChatMessage[]>([]);
 const peerId = ref<number | null>(null);
 const draft = ref("");
-const selectedEmoji = ref("");
+const draftInput = ref<HTMLInputElement | null>(null);
 const sending = ref(false);
 const socketStatus = ref<"idle" | "connecting" | "open" | "closed" | "error">("idle");
 const emojis = REACTION_EMOJIS.slice(0, 10);
@@ -159,14 +159,13 @@ async function openThread(thread: ChatThread) {
 }
 
 async function sendMessage() {
-  if (!activeThread.value || (!draft.value.trim() && !selectedEmoji.value)) return;
+  if (!activeThread.value || !draft.value.trim()) return;
   sending.value = true;
   const payload = {
     type: "send_message",
     threadId: activeThread.value.id,
     content: draft.value,
-    emoji: selectedEmoji.value || undefined,
-    clientId: crypto.randomUUID(),
+    clientId: createClientId(),
   };
 
   try {
@@ -175,12 +174,11 @@ async function sendMessage() {
     } else {
       const response = await chatApi<{ item: ChatMessage }>(`/chat/threads/${activeThread.value.id}/messages`, {
         method: "POST",
-        body: { content: draft.value, emoji: selectedEmoji.value || undefined },
+        body: { content: draft.value },
       });
       handleIncomingMessage(response.item);
     }
     draft.value = "";
-    selectedEmoji.value = "";
   } finally {
     sending.value = false;
   }
@@ -221,6 +219,42 @@ function handleIncomingMessage(message: ChatMessage) {
     thread.lastMessage = message;
     threads.value = [thread, ...threads.value.filter((item) => item.id !== thread.id)];
   }
+}
+
+async function insertEmoji(emoji: string) {
+  const input = draftInput.value;
+  if (!input) {
+    draft.value += emoji;
+    return;
+  }
+
+  const start = input.selectionStart ?? draft.value.length;
+  const end = input.selectionEnd ?? start;
+  draft.value = `${draft.value.slice(0, start)}${emoji}${draft.value.slice(end)}`;
+  await nextTick();
+  input.focus();
+  const cursor = start + emoji.length;
+  input.setSelectionRange(cursor, cursor);
+}
+
+function createClientId() {
+  const cryptoApi = globalThis.crypto;
+  if (typeof cryptoApi?.randomUUID === "function") {
+    return cryptoApi.randomUUID();
+  }
+
+  const bytes = new Uint8Array(16);
+  cryptoApi?.getRandomValues?.(bytes);
+  const random = bytes.some(Boolean)
+    ? Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
+    : Math.random().toString(36).slice(2);
+  return `msg-${Date.now().toString(36)}-${random}`;
+}
+
+function avatarUrl(value?: string | null) {
+  if (!value) return "";
+  if (value.startsWith("/") || value.startsWith("http://") || value.startsWith("https://")) return value;
+  return "";
 }
 
 function upsertThread(thread: ChatThread) {

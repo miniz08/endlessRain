@@ -33,6 +33,8 @@ export function handleProxyUpgrade(
   const pathname = new URL(path, `http://${req.headers.host ?? "localhost"}`).pathname;
   const match = registered.find(({ route }) => matchesRoutePrefix(pathname, route.prefix));
   if (!match?.proxy.upgrade) return false;
+
+  req.url = rewritePath(req, match.route);
   match.proxy.upgrade(req, socket, head);
   return true;
 }
