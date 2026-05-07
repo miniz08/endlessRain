@@ -14,7 +14,10 @@
                 <p class="muted" style="margin: 4px 0 0">专业度 {{ profile.professionalism }} / 友好度 {{ profile.friendliness }}</p>
               </div>
             </div>
-            <FollowButton :user-id="profile.id" :following="summary?.followedByMe" @changed="loadSummary" />
+            <div class="row">
+              <button v-if="canChat" class="primary" @click="openChat">私聊</button>
+              <FollowButton :user-id="profile.id" :following="summary?.followedByMe" @changed="loadSummary" />
+            </div>
           </div>
         </div>
 
@@ -70,11 +73,12 @@ type ListType = "followers" | "following";
 const route = useRoute();
 const userId = computed(() => Number(route.params.id));
 const { blogApi, userApi } = useApi();
-const { refreshMe } = useAuth();
+const { user, refreshMe } = useAuth();
 const profile = ref<PublicUser | null>(null);
 const summary = ref<Summary | null>(null);
 const relationItems = ref<RelationItem[]>([]);
 const activeList = ref<ListType>("followers");
+const canChat = computed(() => Boolean(profile.value && (!user.value || user.value.id !== profile.value.id)));
 
 onMounted(async () => {
   await refreshMe();
@@ -104,5 +108,14 @@ async function loadRelations() {
 async function switchList(type: ListType) {
   activeList.value = type;
   await loadRelations();
+}
+
+async function openChat() {
+  if (!profile.value) return;
+  if (!user.value) {
+    await navigateTo("/login");
+    return;
+  }
+  await navigateTo(`/chat?userId=${profile.value.id}`);
 }
 </script>

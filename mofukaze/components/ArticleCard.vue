@@ -16,7 +16,15 @@
     </NuxtLink>
 
     <div class="tags">
-      <span class="tag">{{ article.tag }}</span>
+      <NuxtLink class="tag tag-link" :to="topicLink(article.tag)">{{ article.tag }}</NuxtLink>
+      <NuxtLink
+        v-for="tag in visibleTags"
+        :key="tag.name"
+        class="tag tag-link"
+        :to="topicLink(tag.name)"
+      >
+        {{ tag.name }}
+      </NuxtLink>
     </div>
 
     <ContentProfilePanel
@@ -62,6 +70,16 @@ const { isLoggedIn } = useAuth();
 const { blogApi } = useApi();
 const visibleEmojis = REACTION_EMOJIS.slice(0, 8);
 const localReactions = ref(props.article.reactions);
+const visibleTags = computed(() => {
+  const seen = new Set([props.article.tag]);
+  return [...props.article.manualTags, ...props.article.aiTags]
+    .filter((tag) => {
+      if (!tag.name || seen.has(tag.name)) return false;
+      seen.add(tag.name);
+      return true;
+    })
+    .slice(0, 5);
+});
 
 watch(
   () => props.article.reactions,
@@ -94,5 +112,9 @@ function formatTime(value: string) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function topicLink(tag: string) {
+  return `/topic?tag=${encodeURIComponent(tag)}`;
 }
 </script>

@@ -8,8 +8,10 @@ import { articleRouter } from "./api/article.js";
 import { commentRouter } from "./api/comment.js";
 import { feedRouter } from "./api/feed.js";
 import { followRouter } from "./api/follow.js";
+import { notificationRouter } from "./api/notification.js";
 import { recoRouter } from "./api/reco.js";
 import { writeAuditLog } from "./services/auditService.js";
+import { ensureNotificationStore } from "./services/notificationService.js";
 import { REACTION_EMOJIS } from "./services/reactionConfig.js";
 import { HttpError } from "./utils/validation.js";
 
@@ -43,6 +45,7 @@ app.get("/health", async (_req, res) => {
 app.use("/articles", articleRouter);
 app.use(commentRouter);
 app.use(followRouter);
+app.use("/notifications", notificationRouter);
 app.use("/feeds", feedRouter);
 app.use("/reco", recoRouter);
 
@@ -52,9 +55,15 @@ app.use((_req, _res, next) => {
 
 app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`[blog_service] listening on ${port}`);
-});
+ensureNotificationStore()
+  .catch((error) => {
+    console.error("[blog_service] notification store init failed", error);
+  })
+  .finally(() => {
+    app.listen(port, () => {
+      console.log(`[blog_service] listening on ${port}`);
+    });
+  });
 
 function assignRequestId(req: Request, res: Response, next: NextFunction): void {
   const incoming = req.headers["x-request-id"];

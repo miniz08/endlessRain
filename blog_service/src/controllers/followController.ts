@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { writeAuditLog } from "../services/auditService.js";
 import { followUser, getFollowSummary, listFollowers, listFollowing, unfollowUser } from "../services/followService.js";
+import { notifyFollowed } from "../services/notificationService.js";
 import { recordFollowAuthorEvent } from "../services/recoEventService.js";
 import { optionalPositiveInt, parsePagination, positiveInt } from "../utils/validation.js";
 
@@ -14,6 +15,7 @@ export async function followUserController(req: Request, res: Response): Promise
     requestId: req.requestId,
   });
   await writeAuditLog(req, "FOLLOW_CREATE", "success", 200, `targetUser=${targetUserId}`);
+  await notifyFollowed(req.auth!.id, targetUserId);
   res.json(payload);
 }
 

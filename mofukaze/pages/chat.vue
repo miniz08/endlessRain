@@ -15,10 +15,33 @@
           <span class="status-dot" :class="socketStatusClass"></span>
         </div>
 
-        <form class="inline-form" @submit.prevent="startThread">
-          <input v-model.number="peerId" type="number" min="1" placeholder="用户 ID" />
-          <button class="primary" :disabled="!peerId">开始</button>
+        <form class="inline-form chat-search-form" @submit.prevent="searchUsers">
+          <input v-model.trim="searchQuery" placeholder="搜索用户名" autocomplete="off" />
+          <button class="primary" :disabled="searching || searchQuery.length < 1">
+            {{ searching ? "搜索中" : "搜索" }}
+          </button>
         </form>
+        <p v-if="searchError" class="error">{{ searchError }}</p>
+
+        <div v-if="searchResults.length > 0" class="user-list chat-search-results">
+          <button
+            v-for="candidate in searchResults"
+            :key="candidate.id"
+            class="user-item search-user-item"
+            type="button"
+            :disabled="candidate.id === user.id"
+            @click="startThreadWithUser(candidate)"
+          >
+            <span class="row">
+              <span class="avatar">
+                <img v-if="avatarUrl(candidate.avatar)" :src="avatarUrl(candidate.avatar)" alt="" />
+                <span v-else>{{ candidate.username.slice(0, 1).toUpperCase() }}</span>
+              </span>
+              <span>{{ candidate.username }}</span>
+            </span>
+            <small class="muted">{{ candidate.id === user.id ? "自己" : "私聊" }}</small>
+          </button>
+        </div>
 
         <div class="thread-list">
           <button
@@ -95,16 +118,21 @@
 </template>
 
 <script setup lang="ts">
-import type { ChatMessage, ChatThread } from "~/types/social";
+import type { ChatMessage, ChatThread, PublicUser } from "~/types/social";
 import { REACTION_EMOJIS } from "~/utils/reactionEmojis";
 
 const config = useRuntimeConfig();
-const { chatApi } = useApi();
+const route = useRoute();
+const router = useRouter();
+const { chatApi, userApi } = useApi();
 const { user, refreshMe } = useAuth();
 const threads = ref<ChatThread[]>([]);
 const activeThread = ref<ChatThread | null>(null);
 const messages = ref<ChatMessage[]>([]);
-const peerId = ref<number | null>(null);
+const searchQuery = ref("");
+const searchResults = ref<PublicUser[]>([]);
+const searching = ref(false);
+const searchError = ref("");
 const draft = ref("");
 const draftInput = ref<HTMLInputElement | null>(null);
 const sending = ref(false);
@@ -129,6 +157,7 @@ onMounted(async () => {
   await refreshMe();
   if (!user.value) return;
   await loadThreads();
+  await openInitialPeer();
   connectSocket();
 });
 
@@ -141,14 +170,34 @@ async function loadThreads() {
   threads.value = payload.items;
 }
 
-async function startThread() {
-  if (!peerId.value) return;
+async function searchUsers() {
+  if (!searchQuery.value.trim()) return;
+  searching.value = true;
+  searchError.value = "";
+  try {
+    const query = new URLSearchParams({ q: searchQuery.value.trim(), limit: "8" });
+    const payload = await userApi<{ items: PublicUser[] }>(`/users/search?${query.toString()}`);
+    searchResults.value = payload.items;
+    if (payload.items.length === 0) {
+      searchError.value = "没有找到匹配用户";
+    }
+  } catch (err) {
+    searchError.value = err instanceof Error ? err.message : "用户搜索失败";
+  } finally {
+    searching.value = false;
+  }
+}
+
+async function startThreadWithUser(target: Pick<PublicUser, "id" | "username" | "avatar" | "role">) {
+  if (target.id === user.value?.id) return;
   const payload = await chatApi<{ item: ChatThread }>("/chat/threads", {
     method: "POST",
-    body: { peerId: peerId.value },
+    body: { peerId: target.id },
   });
   upsertThread(payload.item);
-  peerId.value = null;
+  searchQuery.value = "";
+  searchResults.value = [];
+  searchError.value = "";
   await openThread(payload.item);
 }
 
@@ -259,6 +308,22 @@ function avatarUrl(value?: string | null) {
 
 function upsertThread(thread: ChatThread) {
   threads.value = [thread, ...threads.value.filter((item) => item.id !== thread.id)];
+}
+
+async function openInitialPeer() {
+  const raw = route.query.userId;
+  const targetId = typeof raw === "string" ? Number(raw) : NaN;
+  if (!Number.isInteger(targetId) || targetId <= 0 || targetId === user.value?.id) return;
+
+  const existing = threads.value.find((thread) => thread.userAId === targetId || thread.userBId === targetId);
+  if (existing) {
+    await openThread(existing);
+  } else {
+    const payload = await userApi<{ user: PublicUser }>(`/users/${targetId}`);
+    await startThreadWithUser(payload.user);
+  }
+
+  await router.replace({ path: "/chat" });
 }
 
 function buildWsUrl() {

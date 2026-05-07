@@ -39,6 +39,14 @@ export type Article = {
   recommendation?: Record<string, number>;
 };
 
+export type ArticleTagSummary = {
+  name: string;
+  primaryCount: number;
+  manualCount: number;
+  aiCount: number;
+  total: number;
+};
+
 export type CreateArticleResponse = {
   article: Article;
 };
@@ -81,4 +89,19 @@ export type ChatThread = {
   createdAt: string;
   counterpart: Pick<PublicUser, "id" | "username" | "avatar" | "role">;
   lastMessage: ChatMessage | null;
+};
+
+export type NotificationItem = {
+  id: string;
+  userId: number;
+  type: "CONTENT_PUBLISHED" | "COMMENT" | "REPLY" | "ARTICLE_REACTION" | "COMMENT_REACTION" | "FOLLOW";
+  title: string;
+  body: string | null;
+  actorId: number | null;
+  actor?: Pick<PublicUser, "id" | "username" | "avatar"> | null;
+  articleId: number | null;
+  commentId: number | null;
+  link: string | null;
+  readAt: string | null;
+  createdAt: string;
 };

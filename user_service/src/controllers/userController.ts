@@ -1,7 +1,14 @@
 import type { Request, Response } from "express";
 import { writeAuditLog } from "../services/auditService.js";
-import { getPublicUserById, getUserRating, updateUserRole } from "../services/userService.js";
+import { getPublicUserById, getUserRating, searchPublicUsers, updateUserRole } from "../services/userService.js";
 import { normalizeRole, parsePositiveInt } from "../utils/validation.js";
+
+export async function searchUsers(req: Request, res: Response): Promise<void> {
+  const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const limit = req.query.limit ? parsePositiveInt(req.query.limit, "limit") : 8;
+  const items = q ? await searchPublicUsers(q, limit) : [];
+  res.json({ items });
+}
 
 export async function getUser(req: Request, res: Response): Promise<void> {
   const id = parsePositiveInt(req.params.id, "id");

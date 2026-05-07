@@ -28,6 +28,12 @@
   - `chat_service` 单对单 WebSocket 聊天、REST 历史消息、emoji 消息与 gateway 代理恢复说明。
 - [gateway-frontend-completion-development.md](gateway-frontend-completion-development.md)
   - gateway 健康聚合、路由指标、审计查询，以及前端 `/ops`、`/chat` 页面补全说明。
+- [frontend-topic-chat-ui-polish.md](frontend-topic-chat-ui-polish.md)
+  - 标签分类文章页、聊天用户名搜索、个人页私聊入口、透明工业风 UI 优化与查漏补缺清单。
+- [notification-admin-monitoring-development.md](notification-admin-monitoring-development.md)
+  - 通知中心、运行期通知表、用户互动反馈、管理员监控汇总与论文图示建议。
+- [system-model-diagrams.md](system-model-diagrams.md)
+  - 当前系统核心功能链路、分模块 ER 图、流程图、数据模型图与总体结构图。
 - [docker-deployment-workflow.md](docker-deployment-workflow.md)
   - Docker 开发模式、云服务器部署、端口避让、Git 上传前清理与验证命令。
 

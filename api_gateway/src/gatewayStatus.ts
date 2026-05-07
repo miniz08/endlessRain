@@ -141,6 +141,64 @@ export async function auditLogsController(req: Request, res: Response): Promise<
   }
 }
 
+export async function adminSummaryController(req: Request, res: Response): Promise<void> {
+  const auth = readAuth(req);
+  if (!auth) {
+    res.status(401).json({ error: { code: "AUTH_REQUIRED", message: "Authentication required" } });
+    return;
+  }
+
+  if (!isReviewerRole(auth.role)) {
+    res.status(403).json({ error: { code: "FORBIDDEN", message: "Reviewer or admin role required" } });
+    return;
+  }
+
+  const windowHours = Math.min(Math.max(Number(req.query.hours ?? 24), 1), 168);
+  const since = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+
+  try {
+    const rows = await prisma.audit_log.findMany({
+      where: { createdAt: { gte: since } },
+      orderBy: { createdAt: "desc" },
+      take: 1000,
+    });
+
+    const failures = rows.filter((row) => row.result === "failure");
+    const topActions = topBy(rows.map((row) => row.action), 8);
+    const topRoutes = topBy(rows.map((row) => routeGroup(row.route)), 8);
+
+    res.json({
+      windowHours,
+      since: since.toISOString(),
+      totals: {
+        auditEvents: rows.length,
+        success: rows.length - failures.length,
+        failure: failures.length,
+        failureRate: rows.length ? Math.round((failures.length / rows.length) * 10000) / 100 : 0,
+      },
+      topActions,
+      topRoutes,
+      recentFailures: failures.slice(0, 8).map((row) => ({
+        id: row.id.toString(),
+        action: row.action,
+        route: row.route,
+        statusCode: row.statusCode,
+        detail: row.detail,
+        createdAt: row.createdAt,
+      })),
+      gatewayMetrics: [...routeMetrics.values()].sort((a, b) => b.requestCount - a.requestCount),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Admin summary query failed";
+    res.status(503).json({
+      error: {
+        code: "ADMIN_SUMMARY_UNAVAILABLE",
+        message,
+      },
+    });
+  }
+}
+
 function groupUpstreamServices() {
   const map = new Map<
     string,
@@ -251,6 +309,23 @@ function matchesRoutePrefix(pathname: string, prefix: string): boolean {
 
 function serviceName(targetEnv: string): string {
   return targetEnv.toLowerCase().replace(/_url$/, "");
+}
+
+function topBy(values: string[], limit: number) {
+  const map = new Map<string, number>();
+  for (const value of values) {
+    if (!value) continue;
+    map.set(value, (map.get(value) ?? 0) + 1);
+  }
+  return [...map.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .slice(0, limit);
+}
+
+function routeGroup(route: string) {
+  const parts = route.split("/").filter(Boolean);
+  return parts.length >= 2 ? `/${parts[0]}/${parts[1]}` : route || "/";
 }
 
 function parseJson(text: string): unknown {

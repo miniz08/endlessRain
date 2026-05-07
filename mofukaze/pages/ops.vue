@@ -34,6 +34,59 @@
         </div>
 
         <div class="panel">
+          <div class="row" style="justify-content: space-between">
+            <h3 style="margin: 0">管理员监控</h3>
+            <span class="muted">最近 {{ adminSummary?.windowHours ?? 24 }} 小时</span>
+          </div>
+          <div v-if="adminSummary" class="ops-grid">
+            <div class="metric-card">
+              <strong>审计事件</strong>
+              <p>{{ adminSummary.totals.auditEvents }}</p>
+              <p class="muted">成功 {{ adminSummary.totals.success }} / 失败 {{ adminSummary.totals.failure }}</p>
+            </div>
+            <div class="metric-card">
+              <strong>失败率</strong>
+              <p>{{ adminSummary.totals.failureRate }}%</p>
+              <p class="muted">用于定位异常接口与权限问题</p>
+            </div>
+          </div>
+          <div v-if="adminSummary" class="ops-grid">
+            <div class="metric-card">
+              <strong>Top 动作</strong>
+              <div class="tags" style="margin-top: 10px">
+                <span v-for="item in adminSummary.topActions" :key="item.name" class="tag">{{ item.name }} · {{ item.count }}</span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <strong>Top 路由</strong>
+              <div class="tags" style="margin-top: 10px">
+                <span v-for="item in adminSummary.topRoutes" :key="item.name" class="tag">{{ item.name }} · {{ item.count }}</span>
+              </div>
+            </div>
+          </div>
+          <table v-if="adminSummary?.recentFailures.length" class="data-table" style="margin-top: 12px">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>动作</th>
+                <th>状态</th>
+                <th>详情</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in adminSummary.recentFailures" :key="item.id">
+                <td>{{ formatTime(item.createdAt) }}</td>
+                <td>{{ item.action }}</td>
+                <td>{{ item.statusCode }}</td>
+                <td>{{ item.detail || item.route }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div v-else-if="canReview" class="empty">暂无失败记录</div>
+          <div v-else class="empty">需要 reviewer 或 admin 权限</div>
+        </div>
+
+        <div class="panel">
           <h3 style="margin-top: 0">路由与流量</h3>
           <table class="data-table">
             <thead>
@@ -170,6 +223,27 @@ type Taxonomy = {
   categories: Array<{ code: string; name: string; tags: string[] }>;
 };
 
+type AdminSummary = {
+  windowHours: number;
+  since: string;
+  totals: {
+    auditEvents: number;
+    success: number;
+    failure: number;
+    failureRate: number;
+  };
+  topActions: Array<{ name: string; count: number }>;
+  topRoutes: Array<{ name: string; count: number }>;
+  recentFailures: Array<{
+    id: string;
+    action: string;
+    route: string;
+    statusCode: number;
+    detail: string | null;
+    createdAt: string;
+  }>;
+};
+
 const { gatewayApi, analysisApi } = useApi();
 const { user, refreshMe } = useAuth();
 const loading = ref(false);
@@ -178,6 +252,7 @@ const routes = ref<GatewayRoute[]>([]);
 const metrics = ref<GatewayMetric[]>([]);
 const auditLogs = ref<AuditLog[]>([]);
 const taxonomy = ref<Taxonomy | null>(null);
+const adminSummary = ref<AdminSummary | null>(null);
 const articleId = ref<number | null>(null);
 const analysis = ref<(AiAnalysis & { tags?: Array<{ name: string; confidence: number | null; weight: number | null }> }) | null>(null);
 const analysisError = ref("");
@@ -207,7 +282,7 @@ async function loadOps() {
     routes.value = routesPayload.items;
     metrics.value = metricsPayload.items;
     if (canReview.value) {
-      await Promise.all([loadTaxonomy(), loadAuditLogs()]);
+      await Promise.all([loadTaxonomy(), loadAuditLogs(), loadAdminSummary()]);
     }
   } finally {
     loading.value = false;
@@ -226,6 +301,10 @@ async function loadAuditLogs() {
   } catch (err) {
     auditError.value = err instanceof Error ? err.message : "审计日志不可用";
   }
+}
+
+async function loadAdminSummary() {
+  adminSummary.value = await gatewayApi<AdminSummary>("/gateway/admin-summary?hours=24");
 }
 
 async function loadAnalysis() {

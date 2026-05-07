@@ -18,6 +18,23 @@ export async function getPublicUserById(id: number) {
   return sanitizeUser(user);
 }
 
+export async function searchPublicUsers(query: string, limit: number) {
+  const normalized = query.trim();
+  if (!normalized) return [];
+
+  const users = await prisma.user.findMany({
+    where: {
+      username: {
+        contains: normalized,
+      },
+    },
+    orderBy: [{ username: "asc" }, { id: "asc" }],
+    take: Math.min(Math.max(limit, 1), 20),
+  });
+
+  return users.map(sanitizeUser);
+}
+
 export async function getUserRating(id: number) {
   const user = await prisma.user.findUnique({
     where: { id },

@@ -4,6 +4,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { gatewayRoutes, routeTarget } from "./config/routes.js";
 import {
+  adminSummaryController,
   auditLogsController,
   collectGatewayMetrics,
   gatewayHealthController,
@@ -52,6 +53,7 @@ app.get("/api/gateway/health", gatewayHealthController);
 app.get("/api/gateway/routes", gatewayRoutesController);
 app.get("/api/gateway/metrics", gatewayMetricsController);
 app.get("/api/gateway/audit-logs", auditLogsController);
+app.get("/api/gateway/admin-summary", adminSummaryController);
 app.use(collectGatewayMetrics);
 
 const registeredProxies = registerProxies(app);

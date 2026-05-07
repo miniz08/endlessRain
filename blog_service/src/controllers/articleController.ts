@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { writeAuditLog } from "../services/auditService.js";
-import { createArticle, deleteArticle, getArticle, listArticles, type ArticleAiProcessing } from "../services/articleService.js";
+import { createArticle, deleteArticle, getArticle, listArticleTags, listArticles, type ArticleAiProcessing } from "../services/articleService.js";
+import { notifyArticlePublished } from "../services/notificationService.js";
 import { buildArticleReactionSummaries, toggleArticleReaction } from "../services/reactionService.js";
 import { recordRecoEvent } from "../services/recoEventService.js";
 import {
@@ -22,6 +23,12 @@ export async function listArticlesController(req: Request, res: Response): Promi
     ...pagination,
   });
   res.json(payload);
+}
+
+export async function listArticleTagsController(req: Request, res: Response): Promise<void> {
+  const limit = req.query.limit ? positiveInt(req.query.limit, "limit") : 80;
+  const items = await listArticleTags(Math.min(limit, 120));
+  res.json({ items });
 }
 
 export async function getArticleController(req: Request, res: Response): Promise<void> {
@@ -64,6 +71,7 @@ export async function createArticleController(req: Request, res: Response): Prom
     payload.ai.ok ? 200 : 502,
     summarizeAiAudit(payload.ai),
   );
+  await notifyArticlePublished(req.auth!.id, payload.article.id);
   res.status(201).json({ article: payload.article });
 }
 

@@ -1,5 +1,6 @@
 import { prisma } from "../../lib/prisma.js";
 import { HttpError } from "../utils/validation.js";
+import { notifyArticleReaction, notifyCommentReaction } from "./notificationService.js";
 import { recordRecoEvent } from "./recoEventService.js";
 
 export type ReactionSummary = {
@@ -104,6 +105,7 @@ export async function toggleArticleReaction(articleId: number, userId: number, e
       eventType: "LIKE",
       scene: "article_reaction",
     });
+    await notifyArticleReaction(articleId, userId, emoji);
   }
 
   const summary = (await buildArticleReactionSummaries([articleId], userId)).get(articleId) ?? emptySummary();
@@ -138,6 +140,7 @@ export async function toggleCommentReaction(commentId: number, userId: number, e
         scene: "comment_reaction",
       });
     }
+    await notifyCommentReaction(commentId, userId, emoji);
   }
 
   const summary = (await buildCommentReactionSummaries([commentId], userId)).get(commentId) ?? emptySummary();

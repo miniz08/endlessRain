@@ -78,6 +78,13 @@ export const gatewayRoutes: GatewayRoute[] = [
     stripPrefix: "/api",
   },
   {
+    name: "blog-notifications",
+    prefix: "/api/notifications",
+    targetEnv: "BLOG_SERVICE_URL",
+    defaultTarget: "http://127.0.0.1:3002",
+    stripPrefix: "/api",
+  },
+  {
     name: "ai-analysis",
     prefix: "/api/analysis",
     targetEnv: "AI_SERVICE_URL",

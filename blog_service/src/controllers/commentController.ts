@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { createComment, deleteComment, listArticleComments } from "../services/commentService.js";
 import { writeAuditLog } from "../services/auditService.js";
+import { notifyCommentCreated } from "../services/notificationService.js";
 import { buildCommentReactionSummaries, toggleCommentReaction } from "../services/reactionService.js";
 import { assertEmoji, assertString, optionalPositiveInt, parsePagination, positiveInt } from "../utils/validation.js";
 
@@ -30,6 +31,12 @@ export async function createCommentController(req: Request, res: Response): Prom
   });
 
   await writeAuditLog(req, "COMMENT_CREATE", "success", 201, `article=${articleId}; comment=${comment.id}`);
+  await notifyCommentCreated({
+    articleId,
+    commentId: comment.id,
+    actorId: req.auth!.id,
+    replyToUserId,
+  });
   res.status(201).json({ comment });
 }
 

@@ -47,7 +47,15 @@ export async function listArticles(input: {
     where: {
       ...(input.authorId ? { authorId: input.authorId } : {}),
       ...(input.authorIds ? { authorId: { in: input.authorIds } } : {}),
-      ...(input.tag ? { tag: input.tag } : {}),
+      ...(input.tag
+        ? {
+            OR: [
+              { tag: input.tag },
+              { article_tag_on_article: { some: { article_tag: { name: input.tag } } } },
+              { article_ai_tag_on_article: { some: { article_ai_tag: { name: input.tag } } } },
+            ],
+          }
+        : {}),
       ...(input.cursor ? { id: { lt: input.cursor } } : {}),
     },
     orderBy: [{ posttime: "desc" }, { id: "desc" }],
@@ -67,6 +75,76 @@ export async function listArticles(input: {
     items: page.map((article) => toArticleDto(article, reactionMap.get(article.id), commentCounts.get(article.id) ?? 0)),
     nextCursor: visible.length > input.limit ? page[page.length - 1]?.id : null,
   };
+}
+
+export async function listArticleTags(limit = 80) {
+  type TagCountRow = {
+    name: string;
+    count: bigint | number;
+  };
+
+  const [primaryRows, manualRows, aiRows] = await Promise.all([
+    prisma.$queryRaw<TagCountRow[]>`
+      SELECT tag AS name, COUNT(*) AS count
+      FROM article
+      GROUP BY tag
+      ORDER BY count DESC, tag ASC
+      LIMIT ${limit}
+    `,
+    prisma.$queryRaw<TagCountRow[]>`
+      SELECT t.name AS name, COUNT(ta.articleId) AS count
+      FROM article_tag t
+      INNER JOIN article_tag_on_article ta ON ta.tagId = t.id
+      GROUP BY t.id, t.name
+      ORDER BY count DESC, t.name ASC
+      LIMIT ${limit}
+    `,
+    prisma.$queryRaw<TagCountRow[]>`
+      SELECT t.name AS name, COUNT(ta.articleId) AS count
+      FROM article_ai_tag t
+      INNER JOIN article_ai_tag_on_article ta ON ta.tagId = t.id
+      GROUP BY t.id, t.name
+      ORDER BY count DESC, t.name ASC
+      LIMIT ${limit}
+    `,
+  ]);
+
+  const map = new Map<
+    string,
+    {
+      name: string;
+      primaryCount: number;
+      manualCount: number;
+      aiCount: number;
+      total: number;
+    }
+  >();
+
+  function add(rows: TagCountRow[], key: "primaryCount" | "manualCount" | "aiCount") {
+    for (const row of rows) {
+      const name = row.name?.trim();
+      if (!name) continue;
+      const current = map.get(name) ?? {
+        name,
+        primaryCount: 0,
+        manualCount: 0,
+        aiCount: 0,
+        total: 0,
+      };
+      const count = Number(row.count);
+      current[key] += count;
+      current.total += count;
+      map.set(name, current);
+    }
+  }
+
+  add(primaryRows, "primaryCount");
+  add(manualRows, "manualCount");
+  add(aiRows, "aiCount");
+
+  return [...map.values()]
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
+    .slice(0, limit);
 }
 
 export async function getArticle(articleId: number, viewerId?: number) {
