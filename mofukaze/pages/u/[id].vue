@@ -16,8 +16,24 @@
             </div>
             <div class="row">
               <button v-if="canChat" class="primary" @click="openChat">私聊</button>
-              <FollowButton :user-id="profile.id" :following="summary?.followedByMe" @changed="loadSummary" />
+              <FollowButton v-if="!isOwnProfile" :user-id="profile.id" :following="summary?.followedByMe" @changed="loadSummary" />
             </div>
+          </div>
+          <p v-if="profile.bio" class="profile-bio">{{ profile.bio }}</p>
+          <p v-else class="profile-bio muted">这个人还没有填写个人简介。</p>
+          <div v-if="isOwnProfile" class="profile-editor">
+            <textarea v-model="bioDraft" maxlength="280" placeholder="介绍一下自己" />
+            <div class="composer-actions">
+              <span class="muted">{{ bioLength }} / 280</span>
+              <button type="button" class="ghost" :disabled="avatarUploading" @click="pickAvatar">
+                {{ avatarUploading ? "上传中" : "更换头像" }}
+              </button>
+              <button type="button" class="primary" :disabled="savingBio" @click="saveBio">
+                {{ savingBio ? "保存中" : "保存简介" }}
+              </button>
+              <input ref="avatarInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden @change="handleAvatarUpload" />
+            </div>
+            <p v-if="profileError" class="error">{{ profileError }}</p>
           </div>
         </div>
 
@@ -74,11 +90,19 @@ const route = useRoute();
 const userId = computed(() => Number(route.params.id));
 const { blogApi, userApi } = useApi();
 const { user, refreshMe } = useAuth();
+const { uploadAvatar } = useMediaUpload();
 const profile = ref<PublicUser | null>(null);
 const summary = ref<Summary | null>(null);
 const relationItems = ref<RelationItem[]>([]);
 const activeList = ref<ListType>("followers");
+const avatarInput = ref<HTMLInputElement | null>(null);
+const bioDraft = ref("");
+const savingBio = ref(false);
+const avatarUploading = ref(false);
+const profileError = ref("");
+const isOwnProfile = computed(() => Boolean(profile.value && user.value?.id === profile.value.id));
 const canChat = computed(() => Boolean(profile.value && (!user.value || user.value.id !== profile.value.id)));
+const bioLength = computed(() => Array.from(bioDraft.value).length);
 
 onMounted(async () => {
   await refreshMe();
@@ -88,6 +112,15 @@ onMounted(async () => {
 watch(userId, async () => {
   await Promise.all([loadProfile(), loadSummary(), loadRelations()]);
 });
+
+watch(
+  profile,
+  (value) => {
+    bioDraft.value = value?.bio ?? "";
+    profileError.value = "";
+  },
+  { immediate: true },
+);
 
 async function loadProfile() {
   const payload = await userApi<{ user: PublicUser }>(`/users/${userId.value}`);
@@ -117,5 +150,48 @@ async function openChat() {
     return;
   }
   await navigateTo(`/chat?userId=${profile.value.id}`);
+}
+
+async function saveBio() {
+  savingBio.value = true;
+  profileError.value = "";
+  try {
+    const payload = await userApi<{ user: PublicUser }>("/users/me", {
+      method: "PATCH",
+      body: { bio: bioDraft.value },
+    });
+    profile.value = payload.user;
+    user.value = payload.user;
+  } catch (err) {
+    profileError.value = err instanceof Error ? err.message : "简介保存失败";
+  } finally {
+    savingBio.value = false;
+  }
+}
+
+function pickAvatar() {
+  avatarInput.value?.click();
+}
+
+async function handleAvatarUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  avatarUploading.value = true;
+  profileError.value = "";
+  const currentDraft = bioDraft.value;
+  try {
+    const payload = await uploadAvatar(file);
+    profile.value = payload.user;
+    user.value = payload.user;
+    await nextTick();
+    bioDraft.value = currentDraft;
+  } catch (err) {
+    profileError.value = err instanceof Error ? err.message : "头像上传失败";
+  } finally {
+    avatarUploading.value = false;
+    input.value = "";
+  }
 }
 </script>

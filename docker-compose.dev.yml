@@ -35,11 +35,16 @@ services:
       - ./user_service/src:/app/src
       - ./user_service/lib:/app/lib
       - ./user_service/middlewares:/app/middlewares
+      - ${MEDIA_HOST_DIR:-./media/img/uni}:/media/img/uni
     environment:
       PORT: 3003
       DATABASE_URL: ${DATABASE_URL}
       ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-longseason-dev-access-token-secret}
       CORS_ORIGIN: "true"
+      MEDIA_STORAGE_ROOT: /media/img/uni
+      MEDIA_PUBLIC_BASE: ${MEDIA_PUBLIC_BASE:-/api/users/media/img/uni}
+      MEDIA_IMAGE_MAX_BYTES: ${MEDIA_IMAGE_MAX_BYTES:-2097152}
+      MEDIA_SMALL_IMAGE_MAX_BYTES: ${MEDIA_SMALL_IMAGE_MAX_BYTES:-102400}
     ports:
       - "${DEV_USER_PORT:-13003}:3003"
 

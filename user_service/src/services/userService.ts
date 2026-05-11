@@ -103,6 +103,20 @@ export async function updateUserRole(id: number, role: string) {
   return sanitizeUser(user);
 }
 
+export async function updateUserProfile(id: number, input: { bio?: string | null; avatar?: string }) {
+  const data: { bio?: string | null; avatar?: string; updatedAt: Date } = {
+    updatedAt: new Date(),
+  };
+  if (input.bio !== undefined) data.bio = input.bio;
+  if (input.avatar !== undefined) data.avatar = input.avatar;
+
+  const user = await prisma.user.update({
+    where: { id },
+    data,
+  });
+  return sanitizeUser(user);
+}
+
 function levelFromScore(score: number): "A" | "B" | "C" | "D" {
   if (score >= 85) return "A";
   if (score >= 70) return "B";

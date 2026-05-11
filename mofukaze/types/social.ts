@@ -3,6 +3,7 @@ export type PublicUser = {
   username: string;
   email?: string;
   avatar: string | null;
+  bio?: string | null;
   role: string;
   professionalism: number;
   friendliness: number;
@@ -89,6 +90,14 @@ export type ChatThread = {
   createdAt: string;
   counterpart: Pick<PublicUser, "id" | "username" | "avatar" | "role">;
   lastMessage: ChatMessage | null;
+};
+
+export type UploadedMedia = {
+  url: string;
+  path: string;
+  hash: string;
+  size: number;
+  mimeType: string;
 };
 
 export type NotificationItem = {

@@ -13,6 +13,7 @@ model user {
   email                               String             @unique
   password                            String
   avatar                              String?
+  bio                                 String?             @db.VarChar(280)
   role                                String             @default("user")
   professionalism                     Int                @default(0)
   friendliness                        Int                @default(0)

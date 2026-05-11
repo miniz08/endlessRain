@@ -57,7 +57,7 @@
             </span>
             <span>
               <strong>{{ thread.counterpart.username }}</strong>
-              <small>{{ thread.lastMessage?.content || "暂无消息" }}</small>
+              <small>{{ messagePreview(thread.lastMessage?.content) || "暂无消息" }}</small>
             </span>
           </button>
         </div>
@@ -85,13 +85,14 @@
               :class="{ mine: message.senderId === user.id }"
             >
               <div class="message-bubble">
-                <p>{{ message.content }}</p>
+                <RichContent class="message-content" :content="message.content" compact />
                 <span>{{ formatTime(message.createdAt) }}</span>
               </div>
             </div>
             <div v-if="messages.length === 0" class="empty">暂无消息</div>
           </div>
 
+          <p v-if="chatError" class="error">{{ chatError }}</p>
           <form class="chat-composer" @submit.prevent="sendMessage">
             <div class="emoji-picker">
               <button
@@ -103,6 +104,14 @@
               >
                 {{ emoji }}
               </button>
+              <button type="button" class="media-button" :disabled="uploadingKind === 'chat'" @click="pickChatImage('chat')">
+                {{ uploadingKind === "chat" ? "上传中" : "图片" }}
+              </button>
+              <button type="button" class="media-button" :disabled="uploadingKind === 'sticker'" @click="pickChatImage('sticker')">
+                {{ uploadingKind === "sticker" ? "上传中" : "表情包" }}
+              </button>
+              <input ref="chatImageInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden @change="handleChatImageUpload($event, 'chat')" />
+              <input ref="chatStickerInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden @change="handleChatImageUpload($event, 'sticker')" />
             </div>
             <div class="inline-form">
               <input ref="draftInput" v-model="draft" maxlength="5000" placeholder="输入消息" />
@@ -126,6 +135,7 @@ const route = useRoute();
 const router = useRouter();
 const { chatApi, userApi } = useApi();
 const { user, refreshMe } = useAuth();
+const { uploadImage } = useMediaUpload();
 const threads = ref<ChatThread[]>([]);
 const activeThread = ref<ChatThread | null>(null);
 const messages = ref<ChatMessage[]>([]);
@@ -133,9 +143,13 @@ const searchQuery = ref("");
 const searchResults = ref<PublicUser[]>([]);
 const searching = ref(false);
 const searchError = ref("");
+const chatError = ref("");
 const draft = ref("");
 const draftInput = ref<HTMLInputElement | null>(null);
+const chatImageInput = ref<HTMLInputElement | null>(null);
+const chatStickerInput = ref<HTMLInputElement | null>(null);
 const sending = ref(false);
+const uploadingKind = ref<"" | "chat" | "sticker">("");
 const socketStatus = ref<"idle" | "connecting" | "open" | "closed" | "error">("idle");
 const emojis = REACTION_EMOJIS.slice(0, 10);
 let socket: WebSocket | null = null;
@@ -286,6 +300,46 @@ async function insertEmoji(emoji: string) {
   input.setSelectionRange(cursor, cursor);
 }
 
+function pickChatImage(kind: "chat" | "sticker") {
+  const input = kind === "chat" ? chatImageInput.value : chatStickerInput.value;
+  input?.click();
+}
+
+async function handleChatImageUpload(event: Event, kind: "chat" | "sticker") {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  uploadingKind.value = kind;
+  chatError.value = "";
+  try {
+    const payload = await uploadImage(file, kind);
+    const label = kind === "sticker" ? "表情包" : "图片";
+    await insertDraftText(`![${label}](${payload.media.url})`);
+  } catch (err) {
+    chatError.value = err instanceof Error ? err.message : "图片上传失败";
+  } finally {
+    uploadingKind.value = "";
+    input.value = "";
+  }
+}
+
+async function insertDraftText(text: string) {
+  const input = draftInput.value;
+  if (!input) {
+    draft.value += text;
+    return;
+  }
+
+  const start = input.selectionStart ?? draft.value.length;
+  const end = input.selectionEnd ?? start;
+  draft.value = `${draft.value.slice(0, start)}${text}${draft.value.slice(end)}`;
+  await nextTick();
+  input.focus();
+  const cursor = start + text.length;
+  input.setSelectionRange(cursor, cursor);
+}
+
 function createClientId() {
   const cryptoApi = globalThis.crypto;
   if (typeof cryptoApi?.randomUUID === "function") {
@@ -304,6 +358,11 @@ function avatarUrl(value?: string | null) {
   if (!value) return "";
   if (value.startsWith("/") || value.startsWith("http://") || value.startsWith("https://")) return value;
   return "";
+}
+
+function messagePreview(value?: string | null) {
+  if (!value) return "";
+  return value.replace(/!\[[^\]]*]\([^)]+\)/g, "[图片]");
 }
 
 function upsertThread(thread: ChatThread) {

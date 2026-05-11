@@ -9,6 +9,7 @@ export interface PublicUser {
   username: string;
   email: string;
   avatar: string | null;
+  bio: string | null;
   role: string;
   professionalism: number;
   friendliness: number;
@@ -56,6 +57,7 @@ export function sanitizeUser(user: {
   username: string;
   email: string;
   avatar: string | null;
+  bio: string | null;
   role: string;
   professionalism: number;
   friendliness: number;
@@ -67,6 +69,7 @@ export function sanitizeUser(user: {
     username: user.username,
     email: user.email,
     avatar: user.avatar,
+    bio: user.bio,
     role: user.role,
     professionalism: user.professionalism,
     friendliness: user.friendliness,

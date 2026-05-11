@@ -78,6 +78,9 @@ function inferAction(req: Request): string {
   if (req.path.includes("/register")) return "AUTH_REGISTER";
   if (req.path.includes("/refresh")) return "AUTH_REFRESH";
   if (req.path.includes("/logout")) return "AUTH_LOGOUT";
+  if (req.path.includes("/avatar")) return "USER_AVATAR_UPLOAD";
+  if (req.path.includes("/media")) return "USER_MEDIA_REQUEST";
+  if (req.path.includes("/me")) return "USER_PROFILE_REQUEST";
   if (req.path.includes("/role")) return "USER_ROLE_UPDATE";
   return "USER_SERVICE_REQUEST";
 }

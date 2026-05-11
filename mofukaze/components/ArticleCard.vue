@@ -12,7 +12,7 @@
     </div>
 
     <NuxtLink :to="`/article/${article.id}`">
-      <p class="article-content">{{ compact ? article.excerpt : article.content }}</p>
+      <RichContent class="article-content" :content="compact ? article.excerpt : article.content" :compact="compact" />
     </NuxtLink>
 
     <div class="tags">

@@ -5,6 +5,7 @@ import {
   registerUser,
   revokeRefreshToken,
 } from "../services/authService.js";
+import { getPublicUserById } from "../services/userService.js";
 import { writeAuditLog } from "../services/auditService.js";
 import {
   ACCESS_COOKIE,
@@ -94,7 +95,8 @@ export async function logout(req: Request, res: Response): Promise<void> {
 }
 
 export async function me(req: Request, res: Response): Promise<void> {
-  res.json({ user: req.auth });
+  const user = await getPublicUserById(req.auth!.id);
+  res.json({ user });
 }
 
 function attachAuthCookies(res: Response, tokens: { accessToken: string; refreshToken: string; csrfToken: string; accessTokenExpiresIn: number; refreshTokenExpiresIn: number }): void {

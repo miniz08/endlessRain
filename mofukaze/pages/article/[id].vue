@@ -25,7 +25,7 @@
                 </NuxtLink>
                 <span>{{ formatTime(comment.posttime) }}</span>
               </div>
-              <p class="article-content">{{ comment.content }}</p>
+              <RichContent class="article-content" :content="comment.content" compact />
               <div class="reactions">
                 <button
                   v-for="emoji in reactionEmojis"

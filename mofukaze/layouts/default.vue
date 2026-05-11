@@ -5,7 +5,7 @@
         <NuxtLink class="brand" to="/">LongSeason 社交平台</NuxtLink>
         <nav class="nav">
           <NuxtLink to="/">信息流</NuxtLink>
-          <NuxtLink to="/topic">标签</NuxtLink>
+          <NuxtLink to="/topics">主题</NuxtLink>
           <NuxtLink v-if="user" :to="`/u/${user.id}`">我的主页</NuxtLink>
           <NuxtLink v-if="user" to="/chat">私信</NuxtLink>
           <NuxtLink v-if="user" class="nav-notification" to="/notifications">

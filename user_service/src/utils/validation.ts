@@ -31,6 +31,20 @@ export function optionalString(value: unknown): string | undefined {
   return trimmed || undefined;
 }
 
+export function optionalProfileBio(value: unknown): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (typeof value !== "string") {
+    throw new HttpError(400, "bio must be a string", "VALIDATION_ERROR");
+  }
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (Array.from(trimmed).length > 280) {
+    throw new HttpError(400, "bio must be 280 characters or fewer", "VALIDATION_ERROR");
+  }
+  return trimmed;
+}
+
 export function assertEmail(value: unknown): string {
   const email = assertString(value, "email").toLowerCase();
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

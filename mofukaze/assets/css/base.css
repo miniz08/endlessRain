@@ -244,6 +244,37 @@ textarea {
   margin: 12px 0;
 }
 
+.rich-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rich-content .math-inline {
+  white-space: normal;
+}
+
+.rich-content .math-block {
+  display: block;
+  margin: 10px 0;
+  overflow-x: auto;
+  white-space: normal;
+}
+
+.rich-image {
+  display: block;
+  max-width: min(100%, 560px);
+  max-height: 420px;
+  margin: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.rich-content.compact .rich-image {
+  max-height: 220px;
+}
+
 .tag {
   display: inline-flex;
   align-items: center;
@@ -319,6 +350,12 @@ textarea {
 
 .composer-actions {
   justify-content: flex-end;
+}
+
+.editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .publish-result {
@@ -573,11 +610,17 @@ textarea {
   background: rgba(223, 245, 238, 0.74);
 }
 
-.message-bubble p {
+.message-bubble p,
+.message-content {
   margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   line-height: 1.6;
+}
+
+.message-bubble .rich-image {
+  max-width: min(100%, 320px);
+  max-height: 240px;
 }
 
 .message-bubble span {
@@ -603,6 +646,11 @@ textarea {
   width: 36px;
   height: 36px;
   padding: 0;
+}
+
+.emoji-picker button.media-button {
+  width: auto;
+  padding: 0 10px;
 }
 
 .chat-search-form {
@@ -635,6 +683,20 @@ textarea {
   object-fit: cover;
 }
 
+.profile-bio {
+  margin: 14px 0 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.profile-editor {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
 .error {
   color: var(--danger);
 }
@@ -642,6 +704,87 @@ textarea {
 .topic-page {
   display: grid;
   gap: 16px;
+}
+
+.topic-bubble-page {
+  display: grid;
+  gap: 18px;
+}
+
+.topic-bubble-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.topic-bubble-hero h2 {
+  margin: 0;
+}
+
+.topic-bubble-hero p {
+  margin: 6px 0 0;
+}
+
+.topic-bubble-field {
+  min-height: 520px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(13, 127, 120, 0.1), transparent 28%),
+    radial-gradient(circle at 80% 22%, rgba(168, 101, 0, 0.12), transparent 30%),
+    rgba(255, 255, 255, 0.38);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 18px;
+  overflow: hidden;
+}
+
+.topic-bubble-field.loading {
+  align-items: center;
+}
+
+.topic-bubble {
+  width: var(--bubble-size);
+  height: var(--bubble-size);
+  transform: translateY(var(--bubble-rise));
+  border-radius: 999px;
+  border: 1px solid hsla(var(--bubble-hue), 62%, 34%, 0.22);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.78), transparent 30%),
+    linear-gradient(145deg, hsla(var(--bubble-hue), 64%, 72%, 0.82), hsla(var(--bubble-hue), 58%, 46%, 0.32));
+  box-shadow: 0 18px 34px hsla(var(--bubble-hue), 40%, 34%, 0.18), inset 0 1px 10px rgba(255, 255, 255, 0.42);
+  color: #13232b;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 6px;
+  padding: 18px;
+  text-align: center;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.topic-bubble:hover {
+  transform: translateY(calc(var(--bubble-rise) - 6px)) scale(1.035);
+  border-color: hsla(var(--bubble-hue), 66%, 32%, 0.42);
+  box-shadow: 0 24px 46px hsla(var(--bubble-hue), 44%, 30%, 0.24), inset 0 1px 12px rgba(255, 255, 255, 0.54);
+}
+
+.topic-bubble strong {
+  max-width: 100%;
+  font-size: 18px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.topic-bubble span {
+  color: rgba(20, 33, 43, 0.68);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .topic-hero,
@@ -741,10 +884,29 @@ textarea {
   }
 
   .topic-hero,
+  .topic-bubble-hero,
   .topic-toolbar,
   .notification-head {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .topic-bubble-field {
+    min-height: 420px;
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .topic-bubble {
+    width: min(var(--bubble-size), 44vw);
+    height: min(var(--bubble-size), 44vw);
+    min-width: 118px;
+    min-height: 118px;
+    transform: none;
+  }
+
+  .topic-bubble:hover {
+    transform: translateY(-4px) scale(1.02);
   }
 
   .chat-sidebar,
