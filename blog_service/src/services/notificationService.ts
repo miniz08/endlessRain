@@ -73,10 +73,15 @@ export function ensureNotificationStore(): Promise<void> {
   return ensurePromise;
 }
 
-export async function listNotifications(input: { userId: number; limit: number; cursor?: number }) {
+export async function listNotifications(input: { userId: number; limit: number; cursor?: number; types?: NotificationType[] }) {
   await ensureNotificationStore();
   const limit = Math.min(Math.max(input.limit, 1), 50);
   const params: unknown[] = [input.userId];
+  let typeClause = "";
+  if (input.types?.length) {
+    typeClause = `AND n.type IN (${input.types.map(() => "?").join(", ")})`;
+    params.push(...input.types);
+  }
   let cursorClause = "";
   if (input.cursor) {
     cursorClause = "AND n.id < ?";
@@ -93,7 +98,7 @@ export async function listNotifications(input: { userId: number; limit: number; 
         n.articleId, n.commentId, n.link, n.readAt, n.createdAt
       FROM notification n
       LEFT JOIN user actor ON actor.id = n.actorId
-      WHERE n.userId = ? ${cursorClause}
+      WHERE n.userId = ? ${typeClause} ${cursorClause}
       ORDER BY n.id DESC
       LIMIT ?
     `,

@@ -26,7 +26,9 @@
 
         <div v-if="error" class="panel error">{{ error }}</div>
         <div v-else-if="loading" class="panel empty">加载中</div>
-        <div v-else-if="notifications.length === 0" class="panel empty">暂无通知</div>
+        <div v-else-if="notifications.length === 0" class="panel empty">
+          暂无{{ activeFilterLabel }}通知
+        </div>
 
         <article
           v-for="item in notifications"
@@ -59,13 +61,17 @@
       <aside class="stack">
         <div class="panel">
           <h3>通知类型</h3>
-          <div class="tags">
-            <span class="tag">发布结果</span>
-            <span class="tag">审核反馈</span>
-            <span class="tag">评论</span>
-            <span class="tag">回复</span>
-            <span class="tag">reaction</span>
-            <span class="tag">关注</span>
+          <div class="tags notification-filters">
+            <button
+              v-for="filter in filters"
+              :key="filter.key"
+              type="button"
+              class="tag filter-chip"
+              :class="{ active: activeFilter === filter.key }"
+              @click="setFilter(filter.key)"
+            >
+              {{ filter.label }}
+            </button>
           </div>
         </div>
         <div class="panel">
@@ -80,14 +86,41 @@
 <script setup lang="ts">
 import type { NotificationItem } from "~/types/social";
 
+type FilterKey = "all" | "publish" | "review" | "comment" | "reply" | "reaction" | "follow";
+type NotificationType = NotificationItem["type"];
+
+const filters: Array<{ key: FilterKey; label: string; types: NotificationType[] }> = [
+  { key: "all", label: "全部", types: [] },
+  { key: "publish", label: "发布结果", types: ["CONTENT_PUBLISHED"] },
+  {
+    key: "review",
+    label: "审核反馈",
+    types: [
+      "CONTENT_REVIEW_APPROVED",
+      "CONTENT_REVIEW_LIMITED",
+      "CONTENT_REVIEW_REQUIRED",
+      "CONTENT_REVIEW_REJECTED",
+      "CONTENT_REVIEW_FAILED",
+    ],
+  },
+  { key: "comment", label: "评论", types: ["COMMENT"] },
+  { key: "reply", label: "回复", types: ["REPLY"] },
+  { key: "reaction", label: "reaction", types: ["ARTICLE_REACTION", "COMMENT_REACTION"] },
+  { key: "follow", label: "关注", types: ["FOLLOW"] },
+];
+
 const { blogApi } = useApi();
 const { user, refreshMe } = useAuth();
 const notifications = ref<NotificationItem[]>([]);
 const nextCursor = ref<number | null>(null);
 const unreadCount = useState<number>("notifications:unread", () => 0);
+const activeFilter = ref<FilterKey>("all");
 const loading = ref(false);
 const loadingMore = ref(false);
 const error = ref("");
+
+const activeFilterConfig = computed(() => filters.find((filter) => filter.key === activeFilter.value) ?? filters[0]);
+const activeFilterLabel = computed(() => (activeFilterConfig.value.key === "all" ? "" : activeFilterConfig.value.label));
 
 onMounted(async () => {
   await refreshMe();
@@ -105,6 +138,9 @@ async function loadNotifications(cursor?: number) {
   try {
     const query = new URLSearchParams({ limit: "20" });
     if (cursor) query.set("cursor", String(cursor));
+    if (activeFilterConfig.value.types.length > 0) {
+      query.set("types", activeFilterConfig.value.types.join(","));
+    }
     const payload = await blogApi<{ items: NotificationItem[]; nextCursor: number | null }>(`/notifications?${query.toString()}`);
     if (cursor) {
       notifications.value.push(...payload.items);
@@ -148,6 +184,13 @@ async function loadMore() {
 
 async function refreshNotifications() {
   await Promise.all([loadNotifications(), loadUnreadCount()]);
+}
+
+async function setFilter(filter: FilterKey) {
+  if (activeFilter.value === filter) return;
+  activeFilter.value = filter;
+  nextCursor.value = null;
+  await loadNotifications();
 }
 
 function notificationClass(type: NotificationItem["type"]) {

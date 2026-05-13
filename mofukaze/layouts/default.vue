@@ -4,7 +4,7 @@
       <div class="topbar-inner">
         <NuxtLink class="brand" to="/">LongSeason 社交平台</NuxtLink>
         <nav class="nav">
-          <NuxtLink to="/">信息流</NuxtLink>
+          <NuxtLink to="/">推荐</NuxtLink>
           <NuxtLink to="/topics">主题</NuxtLink>
           <NuxtLink v-if="user" :to="`/u/${user.id}`">我的主页</NuxtLink>
           <NuxtLink v-if="user" to="/chat">私信</NuxtLink>

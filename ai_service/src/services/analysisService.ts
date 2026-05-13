@@ -24,7 +24,7 @@ const provider = createProvider();
 export async function analyzeText(content: string): Promise<AnalysisResult> {
   try {
     return await provider.analyze({
-      content,
+      content: toPlainText(content),
       taxonomy: compactTaxonomyForPrompt(),
     });
   } catch (error) {
@@ -221,6 +221,41 @@ function truncate(value: string | undefined, max: number): string | null {
 
 function clampRating(value: number): number {
   return Math.max(0, Math.min(100, value));
+}
+
+function toPlainText(content: string): string {
+  if (!/<\/?[a-z][\s\S]*>/i.test(content)) return content;
+  return decodeHtml(
+    content
+      .replace(/<span\b([^>]*)data-type=(["'])latex\2([^>]*)>([\s\S]*?)<\/span>/gi, (_match, before: string, _quote: string, after: string, inner: string) => {
+        const source = readAttribute(`${before} ${after}`, "data-latex") || inner.replace(/<[^>]*>/g, "").replace(/^\$|\$$/g, "");
+        return source ? `$${source}$` : "";
+      })
+      .replace(/<img\b[^>]*>/gi, " [image] ")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|h1|h2|h3|li|blockquote)>/gi, "\n")
+      .replace(/<[^>]*>/g, " "),
+  ).replace(/\s+/g, " ").trim();
+}
+
+function readAttribute(attrs: string, name: string): string | undefined {
+  const match = attrs.match(new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, "i"));
+  return decodeHtml(match?.[1] ?? match?.[2] ?? "");
+}
+
+function decodeHtml(value: string): string {
+  return value.replace(/&(#x?[0-9a-f]+|amp|lt|gt|quot|apos|nbsp);/gi, (_match, entity: string) => {
+    const lower = entity.toLowerCase();
+    if (lower === "amp") return "&";
+    if (lower === "lt") return "<";
+    if (lower === "gt") return ">";
+    if (lower === "quot") return '"';
+    if (lower === "apos") return "'";
+    if (lower === "nbsp") return " ";
+    if (lower.startsWith("#x")) return String.fromCodePoint(Number.parseInt(lower.slice(2), 16));
+    if (lower.startsWith("#")) return String.fromCodePoint(Number.parseInt(lower.slice(1), 10));
+    return "";
+  });
 }
 
 function fallbackResult(error: unknown): AnalysisResult {

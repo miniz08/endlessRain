@@ -4,30 +4,24 @@
       <div class="composer-head">
         <div>
           <h3>发布动态</h3>
-          <p class="muted">分享内容、添加标签，发布后会进入信息流。</p>
+          <p class="muted">使用富文本、LaTeX 公式、图片和标签来组织你的内容。</p>
         </div>
         <span class="status-pill risk-low">{{ user.username }}</span>
       </div>
 
-      <textarea ref="contentInput" v-model="content" maxlength="10000" placeholder="写下你想分享的内容" />
-      <input v-model="tagInput" maxlength="191" placeholder="标签，使用逗号分隔" />
+      <TiptapEditor
+        ref="editorRef"
+        v-model="content"
+        :disabled="submitting"
+        :max-length="10000"
+        placeholder="写下你想分享的内容"
+      />
 
-      <div class="editor-toolbar">
-        <button type="button" class="ghost" @click="insertFormula(false)">行内公式</button>
-        <button type="button" class="ghost" @click="insertFormula(true)">独立公式</button>
-        <button type="button" class="ghost" :disabled="uploadingKind === 'article'" @click="pickImage('article')">
-          {{ uploadingKind === "article" ? "上传中" : "插入图片" }}
-        </button>
-        <button type="button" class="ghost" :disabled="uploadingKind === 'sticker'" @click="pickImage('sticker')">
-          {{ uploadingKind === "sticker" ? "上传中" : "插入表情包" }}
-        </button>
-        <input ref="articleImageInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden @change="handleImageUpload($event, 'article')" />
-        <input ref="stickerInput" type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden @change="handleImageUpload($event, 'sticker')" />
-      </div>
+      <input v-model="tagInput" maxlength="191" placeholder="标签，使用逗号分隔" />
 
       <div class="composer-actions">
         <span class="muted">{{ contentLength }} / 10000</span>
-        <button class="primary" :disabled="submitting || !content.trim()">
+        <button class="primary" :disabled="submitting || !canSubmit">
           {{ submitting ? "发布中" : "发布" }}
         </button>
       </div>
@@ -70,7 +64,14 @@
 </template>
 
 <script setup lang="ts">
+import TiptapEditor from "~/components/editor/TiptapEditor.vue";
 import type { CreateArticleResponse } from "~/types/social";
+
+type TiptapEditorExpose = {
+  clear: () => void;
+  getText: () => string;
+  isEmpty: () => boolean;
+};
 
 const emit = defineEmits<{
   created: [payload: CreateArticleResponse];
@@ -78,21 +79,18 @@ const emit = defineEmits<{
 
 const { blogApi } = useApi();
 const { user, refreshMe } = useAuth();
-const { uploadImage } = useMediaUpload();
 const content = ref("");
 const tagInput = ref("");
-const contentInput = ref<HTMLTextAreaElement | null>(null);
-const articleImageInput = ref<HTMLInputElement | null>(null);
-const stickerInput = ref<HTMLInputElement | null>(null);
+const editorRef = ref<TiptapEditorExpose | null>(null);
 const submitting = ref(false);
 const error = ref("");
-const uploadingKind = ref<"" | "article" | "sticker">("");
 const lastResult = ref<CreateArticleResponse | null>(null);
 
-const contentLength = computed(() => Array.from(content.value).length);
+const contentLength = computed(() => Array.from(editorRef.value?.getText() ?? stripHtml(content.value)).length);
+const canSubmit = computed(() => contentLength.value <= 10000 && !(editorRef.value?.isEmpty() ?? isHtmlEmpty(content.value)));
 
 async function submitArticle() {
-  if (!content.value.trim()) return;
+  if (!canSubmit.value) return;
   submitting.value = true;
   error.value = "";
   try {
@@ -107,6 +105,7 @@ async function submitArticle() {
     });
     content.value = "";
     tagInput.value = "";
+    editorRef.value?.clear();
     lastResult.value = payload;
     emit("created", payload);
     await refreshMe();
@@ -118,7 +117,15 @@ async function submitArticle() {
 }
 
 function parseTags(value: string) {
-  return [...new Set(value.split(/[,，\s]+/).map((item) => item.trim()).filter(Boolean))].slice(0, 8);
+  return [...new Set(value.split(/[,\s，、]+/u).map((item) => item.trim()).filter(Boolean))].slice(0, 8);
+}
+
+function stripHtml(value: string) {
+  return value.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+}
+
+function isHtmlEmpty(value: string) {
+  return !stripHtml(value) && !/<(img|video|audio)\b/i.test(value) && !/data-type=["']latex["']/i.test(value);
 }
 
 function reviewTitle(status: CreateArticleResponse["review"]["status"]) {
@@ -145,49 +152,5 @@ function reviewClass(status: CreateArticleResponse["review"]["status"]) {
 
 function reviewBody(payload: CreateArticleResponse) {
   return payload.review.reason || payload.review.suggestion || payload.article.reviewReason || "处理结果已同步到通知中心。";
-}
-
-function insertFormula(block: boolean) {
-  void insertAtCursor(block ? "\n$$\nE = mc^2\n$$\n" : "$E = mc^2$");
-}
-
-function pickImage(kind: "article" | "sticker") {
-  const input = kind === "article" ? articleImageInput.value : stickerInput.value;
-  input?.click();
-}
-
-async function handleImageUpload(event: Event, kind: "article" | "sticker") {
-  const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
-  if (!file) return;
-
-  uploadingKind.value = kind;
-  error.value = "";
-  try {
-    const payload = await uploadImage(file, kind);
-    const label = kind === "sticker" ? "表情包" : "图片";
-    await insertAtCursor(`\n![${label}](${payload.media.url})\n`);
-  } catch (err) {
-    error.value = err instanceof Error ? err.message : "图片上传失败";
-  } finally {
-    uploadingKind.value = "";
-    input.value = "";
-  }
-}
-
-async function insertAtCursor(markup: string) {
-  const input = contentInput.value;
-  if (!input) {
-    content.value += markup;
-    return;
-  }
-
-  const start = input.selectionStart ?? content.value.length;
-  const end = input.selectionEnd ?? start;
-  content.value = `${content.value.slice(0, start)}${markup}${content.value.slice(end)}`;
-  await nextTick();
-  input.focus();
-  const cursor = start + markup.length;
-  input.setSelectionRange(cursor, cursor);
 }
 </script>
