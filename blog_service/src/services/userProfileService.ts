@@ -66,21 +66,23 @@ export async function refreshUserProfile(userId: number) {
     version: 1,
   };
 
-  return prisma.reco_user_profile.upsert({
-    where: { userId },
-    create: {
-      userId,
-      tagVector: profile,
-      authorAffinity: normalizedAuthors,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    update: {
-      tagVector: profile,
-      authorAffinity: normalizedAuthors,
-      updatedAt: new Date(),
-    },
-  });
+  const tagVectorJson = JSON.stringify(profile);
+  const authorAffinityJson = JSON.stringify(normalizedAuthors);
+
+  await prisma.$executeRaw`
+    INSERT INTO reco_user_profile (userId, tagVector, authorAffinity, updatedAt, createdAt)
+    VALUES (${userId}, ${tagVectorJson}, ${authorAffinityJson}, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3))
+    ON DUPLICATE KEY UPDATE
+      tagVector = ${tagVectorJson},
+      authorAffinity = ${authorAffinityJson},
+      updatedAt = CURRENT_TIMESTAMP(3)
+  `;
+
+  const updated = await prisma.reco_user_profile.findUnique({ where: { userId } });
+  if (!updated) {
+    throw new Error("Failed to refresh recommendation profile");
+  }
+  return updated;
 }
 
 export async function getUserProfile(userId: number) {

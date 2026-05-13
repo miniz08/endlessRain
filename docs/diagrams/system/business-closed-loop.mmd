@@ -1,0 +1,20 @@
+flowchart TD
+  A["用户注册/登录"] --> B["发布内容"]
+  B --> C["内容进入 PENDING_REVIEW"]
+  C --> D["AI 分析内容"]
+  D --> E{"AI 决策"}
+  E -- ALLOW --> F["PUBLISHED 正常公开"]
+  E -- LOW_PRIORITY --> G["LOW_PRIORITY 降低展示优先级"]
+  E -- REVIEW --> H["REVIEW_REQUIRED 等待复核"]
+  E -- REJECT --> I["REJECTED 暂不公开"]
+  F --> J["首页/关注流/推荐流展示"]
+  G --> J
+  J --> K["评论、Emoji、关注、私信"]
+  K --> L["生成通知与推荐事件"]
+  L --> M["更新用户画像与综合评级"]
+  M --> N["影响下一轮推荐展示"]
+  B --> O["写入审计日志"]
+  D --> O
+  K --> O
+  O --> P["管理员监控与审计查询"]
+

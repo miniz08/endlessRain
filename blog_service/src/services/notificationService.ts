@@ -2,6 +2,11 @@ import { prisma } from "../../lib/prisma.js";
 
 export type NotificationType =
   | "CONTENT_PUBLISHED"
+  | "CONTENT_REVIEW_APPROVED"
+  | "CONTENT_REVIEW_LIMITED"
+  | "CONTENT_REVIEW_REQUIRED"
+  | "CONTENT_REVIEW_REJECTED"
+  | "CONTENT_REVIEW_FAILED"
   | "COMMENT"
   | "REPLY"
   | "ARTICLE_REACTION"
@@ -170,6 +175,64 @@ export async function notifyArticlePublished(userId: number, articleId: number) 
   });
 }
 
+export async function notifyArticleReviewResult(input: {
+  userId: number;
+  articleId: number;
+  status: string;
+  decision?: string | null;
+  riskLevel?: string | null;
+  reason?: string | null;
+  suggestion?: string | null;
+}) {
+  const detail = [input.reason, input.suggestion].filter(Boolean).join(" ");
+  const body = detail || "系统已完成内容处理。";
+
+  if (input.status === "PUBLISHED") {
+    await createNotification({
+      userId: input.userId,
+      type: "CONTENT_REVIEW_APPROVED",
+      title: "动态审核通过",
+      body: bodyWithRisk("你的内容已进入公开信息流。", input.riskLevel, body),
+      articleId: input.articleId,
+      link: `/article/${input.articleId}`,
+    });
+    return;
+  }
+
+  if (input.status === "LOW_PRIORITY") {
+    await createNotification({
+      userId: input.userId,
+      type: "CONTENT_REVIEW_LIMITED",
+      title: "动态已发布，展示优先级较低",
+      body: bodyWithRisk("你的内容可以公开展示，但推荐优先级会被降低。", input.riskLevel, body),
+      articleId: input.articleId,
+      link: `/article/${input.articleId}`,
+    });
+    return;
+  }
+
+  if (input.status === "REJECTED") {
+    await createNotification({
+      userId: input.userId,
+      type: "CONTENT_REVIEW_REJECTED",
+      title: "动态未通过审核",
+      body: bodyWithRisk("该内容暂不进入公开信息流。", input.riskLevel, body),
+      articleId: input.articleId,
+      link: `/article/${input.articleId}`,
+    });
+    return;
+  }
+
+  await createNotification({
+    userId: input.userId,
+    type: input.decision === "REVIEW" ? "CONTENT_REVIEW_REQUIRED" : "CONTENT_REVIEW_FAILED",
+    title: input.decision === "REVIEW" ? "动态进入复核" : "动态审核暂未完成",
+    body: bodyWithRisk("该内容暂不公开展示，请等待复核或稍后重试。", input.riskLevel, body),
+    articleId: input.articleId,
+    link: `/article/${input.articleId}`,
+  });
+}
+
 export async function notifyCommentCreated(input: {
   articleId: number;
   commentId: number;
@@ -301,4 +364,9 @@ function toDto(row: NotificationRow): NotificationDto {
     readAt: row.readAt,
     createdAt: row.createdAt,
   };
+}
+
+function bodyWithRisk(prefix: string, riskLevel: string | null | undefined, detail: string): string {
+  const risk = riskLevel ? `风险等级：${riskLevel}。` : "";
+  return `${prefix}${risk}${detail ? ` ${detail}` : ""}`.slice(0, 512);
 }

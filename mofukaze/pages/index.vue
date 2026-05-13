@@ -118,6 +118,7 @@ async function refreshProfile() {
 }
 
 function handleArticleCreated(payload: CreateArticleResponse) {
+  if (payload.article.status !== "PUBLISHED" && payload.article.status !== "LOW_PRIORITY") return;
   articles.value = [payload.article, ...articles.value.filter((article) => article.id !== payload.article.id)];
   activeFeed.value = "recommended";
 }

@@ -61,6 +61,7 @@
           <h3>通知类型</h3>
           <div class="tags">
             <span class="tag">发布结果</span>
+            <span class="tag">审核反馈</span>
             <span class="tag">评论</span>
             <span class="tag">回复</span>
             <span class="tag">reaction</span>
@@ -69,7 +70,7 @@
         </div>
         <div class="panel">
           <h3>闭环说明</h3>
-          <p class="muted">通知中心不暴露 AI 审查过程，只反馈用户可感知的发布与互动状态。</p>
+          <p class="muted">通知中心会反馈内容审核结果、互动提醒和关系变化，帮助用户了解内容处理状态。</p>
         </div>
       </aside>
     </div>
@@ -150,8 +151,9 @@ async function refreshNotifications() {
 }
 
 function notificationClass(type: NotificationItem["type"]) {
-  if (type === "CONTENT_PUBLISHED") return "risk-low";
-  if (type === "FOLLOW") return "risk-mid";
+  if (type === "CONTENT_PUBLISHED" || type === "CONTENT_REVIEW_APPROVED") return "risk-low";
+  if (type === "CONTENT_REVIEW_LIMITED" || type === "CONTENT_REVIEW_REQUIRED" || type === "FOLLOW") return "risk-mid";
+  if (type === "CONTENT_REVIEW_REJECTED" || type === "CONTENT_REVIEW_FAILED") return "risk-high";
   return "risk-high";
 }
 

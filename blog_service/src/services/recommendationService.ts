@@ -98,6 +98,7 @@ async function ensureProfile(userId: number) {
 async function loadCandidates(input: { cursor?: number; take: number }) {
   return prisma.article.findMany({
     where: {
+      status: { in: ["PUBLISHED", "LOW_PRIORITY"] },
       ...(input.cursor ? { id: { lt: input.cursor } } : {}),
     },
     orderBy: [{ posttime: "desc" }, { id: "desc" }],
@@ -168,6 +169,7 @@ function scoreArticle(
 }
 
 function isVisible(article: ArticleCandidate): boolean {
+  if (article.status !== "PUBLISHED" && article.status !== "LOW_PRIORITY") return false;
   const legality = article.article_ai_analysis?.legalityScore;
   return legality === undefined || legality === null || legality >= 40;
 }

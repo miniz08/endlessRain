@@ -1,0 +1,70 @@
+erDiagram
+  USER ||--o{ ARTICLE : publishes
+  ARTICLE ||--o{ COMMENT : has
+  ARTICLE ||--o{ ARTICLE_TAG_ON_ARTICLE : tagged_by
+  ARTICLE_TAG ||--o{ ARTICLE_TAG_ON_ARTICLE : maps
+  ARTICLE ||--|| ARTICLE_AI_ANALYSIS : analyzed_as
+  ARTICLE ||--o{ ARTICLE_AI_TAG_ON_ARTICLE : classified_as
+  ARTICLE_AI_TAG ||--o{ ARTICLE_AI_TAG_ON_ARTICLE : maps
+
+  USER {
+    int id PK
+    varchar username
+    varchar role
+  }
+
+  ARTICLE {
+    int id PK
+    longtext content
+    varchar tag
+    varchar status
+    varchar reviewDecision
+    varchar riskLevel
+    varchar reviewReason
+    varchar reviewSuggestion
+    datetime reviewedAt
+    datetime posttime
+    int authorId FK
+  }
+
+  COMMENT {
+    int id PK
+    longtext content
+    datetime posttime
+    int userId FK
+    int articleId FK
+    varchar status
+  }
+
+  ARTICLE_TAG {
+    int id PK
+    varchar name UK
+  }
+
+  ARTICLE_TAG_ON_ARTICLE {
+    int articleId PK
+    int tagId PK
+    float weight
+  }
+
+  ARTICLE_AI_ANALYSIS {
+    int id PK
+    int articleId UK
+    int friendlinessScore
+    int rationalityScore
+    int legalityScore
+    int professionalismScore
+  }
+
+  ARTICLE_AI_TAG {
+    int id PK
+    varchar name UK
+  }
+
+  ARTICLE_AI_TAG_ON_ARTICLE {
+    int articleId PK
+    int tagId PK
+    float confidence
+    float weight
+  }
+

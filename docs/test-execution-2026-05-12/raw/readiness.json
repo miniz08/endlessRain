@@ -1,0 +1,17 @@
+[
+  {
+    "url": "http://127.0.0.1:3001/health",
+    "ready": true,
+    "last": "200"
+  },
+  {
+    "url": "http://127.0.0.1:3001/api/gateway/health",
+    "ready": true,
+    "last": "200"
+  },
+  {
+    "url": "http://127.0.0.1:3000/",
+    "ready": true,
+    "last": "200"
+  }
+]

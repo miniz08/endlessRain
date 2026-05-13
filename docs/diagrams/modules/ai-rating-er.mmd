@@ -1,0 +1,38 @@
+erDiagram
+  ARTICLE ||--|| ARTICLE_AI_ANALYSIS : analyzed_as
+  ARTICLE ||--o{ ARTICLE_AI_TAG_ON_ARTICLE : classified_as
+  ARTICLE_AI_TAG ||--o{ ARTICLE_AI_TAG_ON_ARTICLE : maps
+
+  ARTICLE {
+    int id PK
+    longtext content
+    varchar status
+    varchar reviewDecision
+    varchar riskLevel
+    int authorId FK
+  }
+
+  ARTICLE_AI_ANALYSIS {
+    int id PK
+    int articleId UK
+    int friendlinessScore
+    int rationalityScore
+    int legalityScore
+    int professionalismScore
+    datetime analyzedAt
+  }
+
+  ARTICLE_AI_TAG {
+    int id PK
+    varchar name UK
+    datetime createdAt
+  }
+
+  ARTICLE_AI_TAG_ON_ARTICLE {
+    int articleId PK
+    int tagId PK
+    float confidence
+    float weight
+    datetime createdAt
+  }
+

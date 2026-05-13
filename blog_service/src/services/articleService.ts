@@ -5,6 +5,16 @@ import { buildArticleReactionSummaries, type ReactionSummary } from "./reactionS
 
 type ArticleWithRelations = Awaited<ReturnType<typeof findArticleById>>;
 
+export type ArticleReviewStatus = "PENDING_REVIEW" | "PUBLISHED" | "LOW_PRIORITY" | "REVIEW_REQUIRED" | "REJECTED";
+
+export type ArticleReviewSummary = {
+  status: ArticleReviewStatus;
+  decision?: string | null;
+  riskLevel?: string | null;
+  reason?: string | null;
+  suggestion?: string | null;
+};
+
 export type ArticleAiProcessing = {
   requested: boolean;
   ok: boolean;
@@ -34,8 +44,12 @@ export type ArticleAiProcessing = {
   error?: string;
 };
 
+const PUBLIC_ARTICLE_STATUSES: ArticleReviewStatus[] = ["PUBLISHED", "LOW_PRIORITY"];
+const REVIEWER_ROLES = new Set(["admin", "reviewer"]);
+
 export async function listArticles(input: {
   viewerId?: number;
+  viewerRole?: string;
   authorId?: number;
   authorIds?: number[];
   tag?: string;
@@ -43,8 +57,13 @@ export async function listArticles(input: {
   cursor?: number;
   hideBlocked?: boolean;
 }) {
+  const includePrivate =
+    Boolean(input.viewerRole && REVIEWER_ROLES.has(input.viewerRole.toLowerCase())) ||
+    Boolean(input.authorId && input.viewerId === input.authorId);
+
   const articles = await prisma.article.findMany({
     where: {
+      ...(includePrivate ? {} : { status: { in: PUBLIC_ARTICLE_STATUSES } }),
       ...(input.authorId ? { authorId: input.authorId } : {}),
       ...(input.authorIds ? { authorId: { in: input.authorIds } } : {}),
       ...(input.tag
@@ -87,6 +106,7 @@ export async function listArticleTags(limit = 80) {
     prisma.$queryRaw<TagCountRow[]>`
       SELECT tag AS name, COUNT(*) AS count
       FROM article
+      WHERE status IN ('PUBLISHED', 'LOW_PRIORITY')
       GROUP BY tag
       ORDER BY count DESC, tag ASC
       LIMIT ${limit}
@@ -95,6 +115,8 @@ export async function listArticleTags(limit = 80) {
       SELECT t.name AS name, COUNT(ta.articleId) AS count
       FROM article_tag t
       INNER JOIN article_tag_on_article ta ON ta.tagId = t.id
+      INNER JOIN article a ON a.id = ta.articleId
+      WHERE a.status IN ('PUBLISHED', 'LOW_PRIORITY')
       GROUP BY t.id, t.name
       ORDER BY count DESC, t.name ASC
       LIMIT ${limit}
@@ -103,6 +125,8 @@ export async function listArticleTags(limit = 80) {
       SELECT t.name AS name, COUNT(ta.articleId) AS count
       FROM article_ai_tag t
       INNER JOIN article_ai_tag_on_article ta ON ta.tagId = t.id
+      INNER JOIN article a ON a.id = ta.articleId
+      WHERE a.status IN ('PUBLISHED', 'LOW_PRIORITY')
       GROUP BY t.id, t.name
       ORDER BY count DESC, t.name ASC
       LIMIT ${limit}
@@ -147,13 +171,16 @@ export async function listArticleTags(limit = 80) {
     .slice(0, limit);
 }
 
-export async function getArticle(articleId: number, viewerId?: number) {
+export async function getArticle(articleId: number, viewer?: { id?: number; role?: string }) {
   const article = await findArticleById(articleId);
   if (!article) {
     throw new HttpError(404, "Article not found", "ARTICLE_NOT_FOUND");
   }
+  if (!canViewArticle(article, viewer)) {
+    throw new HttpError(404, "Article not found", "ARTICLE_NOT_FOUND");
+  }
 
-  const reactions = await buildArticleReactionSummaries([article.id], viewerId);
+  const reactions = await buildArticleReactionSummaries([article.id], viewer?.id);
   const commentCounts = await getCommentCounts([article.id]);
   return toArticleDto(article, reactions.get(article.id), commentCounts.get(article.id) ?? 0);
 }
@@ -176,6 +203,11 @@ export async function createArticle(input: {
       authorId: input.authorId,
       content,
       tag: primaryTag,
+      status: "PENDING_REVIEW",
+      reviewDecision: "PENDING",
+      riskLevel: null,
+      reviewReason: "内容已提交，等待 AI 审核。",
+      reviewSuggestion: "审核完成后会通过通知中心反馈处理结果。",
     },
     include: articleInclude(),
   });
@@ -184,11 +216,13 @@ export async function createArticle(input: {
   await syncManualTags(article.id, manualTags);
 
   const ai = await requestAiAnalysis(article.id, input.requestId);
+  await applyReviewResult(article.id, ai);
   const freshArticle = (await findArticleById(article.id)) ?? article;
 
   return {
     article: toArticleDto(freshArticle, undefined, 0),
     ai,
+    review: reviewSummary(freshArticle),
   };
 }
 
@@ -270,6 +304,12 @@ function toArticleDto(
     content: article.content,
     excerpt: summarizeContent(article.content),
     tag: article.tag,
+    status: article.status as ArticleReviewStatus,
+    reviewDecision: article.reviewDecision,
+    riskLevel: article.riskLevel,
+    reviewReason: article.reviewReason,
+    reviewSuggestion: article.reviewSuggestion,
+    reviewedAt: article.reviewedAt,
     posttime: article.posttime,
     author: article.user,
     aiAnalysis: article.article_ai_analysis,
@@ -288,8 +328,85 @@ function toArticleDto(
 }
 
 function isVisibleInFeed(article: NonNullable<ArticleWithRelations>): boolean {
+  if (!isPublicArticleStatus(article.status)) return false;
   const legalityScore = article.article_ai_analysis?.legalityScore;
   return legalityScore === undefined || legalityScore === null || legalityScore >= 40;
+}
+
+function canViewArticle(article: NonNullable<ArticleWithRelations>, viewer?: { id?: number; role?: string }): boolean {
+  if (isPublicArticleStatus(article.status)) return true;
+  if (viewer?.id && viewer.id === article.authorId) return true;
+  return Boolean(viewer?.role && REVIEWER_ROLES.has(viewer.role.toLowerCase()));
+}
+
+export function isPublicArticleStatus(status?: string | null): boolean {
+  return PUBLIC_ARTICLE_STATUSES.includes((status ?? "PUBLISHED") as ArticleReviewStatus);
+}
+
+function reviewSummary(article: NonNullable<ArticleWithRelations>): ArticleReviewSummary {
+  return {
+    status: article.status as ArticleReviewStatus,
+    decision: article.reviewDecision,
+    riskLevel: article.riskLevel,
+    reason: article.reviewReason,
+    suggestion: article.reviewSuggestion,
+  };
+}
+
+async function applyReviewResult(articleId: number, ai: ArticleAiProcessing): Promise<void> {
+  if (ai.status === "analyzed" && ai.result) {
+    await prisma.article.update({
+      where: { id: articleId },
+      data: {
+        status: statusFromDecision(ai.result.decision),
+        reviewDecision: ai.result.decision ?? null,
+        riskLevel: ai.result.riskLevel ?? null,
+        reviewReason: truncate(ai.result.reason, 512),
+        reviewSuggestion: truncate(ai.result.suggestion, 512),
+        reviewedAt: new Date(),
+      },
+    });
+    return;
+  }
+
+  if (ai.status === "failed") {
+    await prisma.article.update({
+      where: { id: articleId },
+      data: {
+        status: "REVIEW_REQUIRED",
+        reviewDecision: "REVIEW",
+        riskLevel: "HIGH",
+        reviewReason: truncate(ai.error ?? "AI 审核失败，内容已转入复核。", 512),
+        reviewSuggestion: "请稍后重试分析，或等待管理员复核。",
+        reviewedAt: new Date(),
+      },
+    });
+    return;
+  }
+
+  await prisma.article.update({
+    where: { id: articleId },
+    data: {
+      status: "PUBLISHED",
+      reviewDecision: "SKIPPED",
+      riskLevel: null,
+      reviewReason: truncate(ai.message ?? "AI 审核未启用，内容按当前配置直接发布。", 512),
+      reviewSuggestion: "建议在正式环境开启 AI 审核。",
+      reviewedAt: new Date(),
+    },
+  });
+}
+
+function statusFromDecision(decision?: string): ArticleReviewStatus {
+  if (decision === "ALLOW") return "PUBLISHED";
+  if (decision === "LOW_PRIORITY") return "LOW_PRIORITY";
+  if (decision === "REJECT") return "REJECTED";
+  return "REVIEW_REQUIRED";
+}
+
+function truncate(value: string | undefined, max: number): string | null {
+  if (!value) return null;
+  return value.length > max ? value.slice(0, max) : value;
 }
 
 async function syncManualTags(articleId: number, tags: string[]): Promise<void> {

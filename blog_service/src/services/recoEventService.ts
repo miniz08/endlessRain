@@ -41,9 +41,9 @@ const profileTriggerEvents = new Set<RecoEventType>([
 export async function recordRecoEvent(input: RecoEventInput) {
   const article = await prisma.article.findUnique({
     where: { id: input.articleId },
-    select: { id: true },
+    select: { id: true, status: true },
   });
-  if (!article) {
+  if (!article || !isPublicArticleStatus(article.status)) {
     throw new HttpError(404, "Article not found", "ARTICLE_NOT_FOUND");
   }
 
@@ -159,57 +159,53 @@ export async function recordFollowAuthorEvent(input: {
 async function updateDailyStat(input: RecoEventInput): Promise<void> {
   const statDate = startOfToday();
   const data = metricDelta(input);
+  const impressions = data.impressions ?? 0;
+  const clicks = data.clicks ?? 0;
+  const dwellMsSum = Number(data.dwellMsSum ?? BigInt(0));
+  const completeReads = data.completeReads ?? 0;
+  const likes = data.likes ?? 0;
+  const comments = data.comments ?? 0;
+  const favorites = data.favorites ?? 0;
+  const follows = data.follows ?? 0;
+  const hides = data.hides ?? 0;
+  const reports = data.reports ?? 0;
+  const qualityScore = qualityDelta(input);
 
-  await prisma.reco_article_daily_stat.upsert({
-    where: {
-      articleId_statDate: {
-        articleId: input.articleId,
-        statDate,
-      },
-    },
-    create: {
-      articleId: input.articleId,
-      statDate,
-      updatedAt: new Date(),
-      qualityScore: qualityDelta(input),
-      ...data,
-    },
-    update: {
-      updatedAt: new Date(),
-      impressions: { increment: data.impressions ?? 0 },
-      clicks: { increment: data.clicks ?? 0 },
-      dwellMsSum: { increment: data.dwellMsSum ?? BigInt(0) },
-      completeReads: { increment: data.completeReads ?? 0 },
-      likes: { increment: data.likes ?? 0 },
-      comments: { increment: data.comments ?? 0 },
-      favorites: { increment: data.favorites ?? 0 },
-      follows: { increment: data.follows ?? 0 },
-      hides: { increment: data.hides ?? 0 },
-      reports: { increment: data.reports ?? 0 },
-      qualityScore: { increment: qualityDelta(input) },
-    },
-  });
+  await prisma.$executeRaw`
+    INSERT INTO reco_article_daily_stat (
+      articleId, statDate, impressions, clicks, dwellMsSum, completeReads,
+      likes, comments, favorites, follows, hides, reports, qualityScore,
+      updatedAt, createdAt
+    )
+    VALUES (
+      ${input.articleId}, ${statDate}, ${impressions}, ${clicks}, ${dwellMsSum}, ${completeReads},
+      ${likes}, ${comments}, ${favorites}, ${follows}, ${hides}, ${reports}, ${qualityScore},
+      CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3)
+    )
+    ON DUPLICATE KEY UPDATE
+      updatedAt = CURRENT_TIMESTAMP(3),
+      impressions = impressions + ${impressions},
+      clicks = clicks + ${clicks},
+      dwellMsSum = dwellMsSum + ${dwellMsSum},
+      completeReads = completeReads + ${completeReads},
+      likes = likes + ${likes},
+      comments = comments + ${comments},
+      favorites = favorites + ${favorites},
+      follows = follows + ${follows},
+      hides = hides + ${hides},
+      reports = reports + ${reports},
+      qualityScore = qualityScore + ${qualityScore}
+  `;
 }
 
 async function markSeen(userId: number, articleId: number): Promise<void> {
-  await prisma.reco_user_seen.upsert({
-    where: {
-      userId_articleId: {
-        userId,
-        articleId,
-      },
-    },
-    create: {
-      userId,
-      articleId,
-      seenCount: 1,
-      lastSeenAt: new Date(),
-    },
-    update: {
-      seenCount: { increment: 1 },
-      lastSeenAt: new Date(),
-    },
-  });
+  await prisma.$executeRaw`
+    INSERT INTO reco_user_seen (userId, articleId, seenCount, lastSeenAt, createdAt)
+    VALUES (${userId}, ${articleId}, 1, CURRENT_TIMESTAMP(3), CURRENT_TIMESTAMP(3))
+    ON DUPLICATE KEY UPDATE
+      seenCount = seenCount + 1,
+      lastSeenAt = CURRENT_TIMESTAMP(3)
+  `;
 }
 
 function metricDelta(input: RecoEventInput) {
@@ -265,4 +261,8 @@ function qualityDelta(input: RecoEventInput): number {
 function startOfToday(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+function isPublicArticleStatus(status?: string | null): boolean {
+  return status === undefined || status === null || status === "PUBLISHED" || status === "LOW_PRIORITY";
 }

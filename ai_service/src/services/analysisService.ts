@@ -14,6 +14,9 @@ type PersistedAnalysis = {
 type UserAverageRow = {
   avgProfessionalism: number | null;
   avgFriendliness: number | null;
+  lowPriorityCount: bigint | number;
+  reviewRequiredCount: bigint | number;
+  rejectedCount: bigint | number;
 };
 
 const provider = createProvider();
@@ -118,6 +121,18 @@ export async function persistArticleAnalysis(articleId: number, result: Analysis
     },
   });
 
+  await prisma.article.update({
+    where: { id: articleId },
+    data: {
+      status: statusFromDecision(result.decision),
+      reviewDecision: result.decision,
+      riskLevel: result.riskLevel,
+      reviewReason: truncate(result.reason, 512),
+      reviewSuggestion: truncate(result.suggestion, 512),
+      reviewedAt: new Date(),
+    },
+  });
+
   await refreshUserRating(article.authorId);
 
   return {
@@ -167,7 +182,10 @@ async function refreshUserRating(userId: number): Promise<void> {
   const rows = await prisma.$queryRaw<UserAverageRow[]>`
     SELECT
       AVG(aia.professionalismScore) AS avgProfessionalism,
-      AVG(aia.friendlinessScore) AS avgFriendliness
+      AVG(aia.friendlinessScore) AS avgFriendliness,
+      SUM(CASE WHEN a.status = 'LOW_PRIORITY' THEN 1 ELSE 0 END) AS lowPriorityCount,
+      SUM(CASE WHEN a.status = 'REVIEW_REQUIRED' THEN 1 ELSE 0 END) AS reviewRequiredCount,
+      SUM(CASE WHEN a.status = 'REJECTED' THEN 1 ELSE 0 END) AS rejectedCount
     FROM article a
     INNER JOIN article_ai_analysis aia ON aia.articleId = a.id
     WHERE a.authorId = ${userId}
@@ -175,14 +193,34 @@ async function refreshUserRating(userId: number): Promise<void> {
 
   const row = rows[0];
   if (!row) return;
+  const penalty =
+    Number(row.lowPriorityCount ?? 0) * 3 +
+    Number(row.reviewRequiredCount ?? 0) * 8 +
+    Number(row.rejectedCount ?? 0) * 18;
 
   await prisma.user.update({
     where: { id: userId },
     data: {
-      professionalism: Math.round(row.avgProfessionalism ?? 0),
-      friendliness: Math.round(row.avgFriendliness ?? 0),
+      professionalism: clampRating(Math.round((row.avgProfessionalism ?? 0) - penalty)),
+      friendliness: clampRating(Math.round((row.avgFriendliness ?? 0) - penalty * 0.6)),
     },
   });
+}
+
+function statusFromDecision(decision: string): "PUBLISHED" | "LOW_PRIORITY" | "REVIEW_REQUIRED" | "REJECTED" {
+  if (decision === "ALLOW") return "PUBLISHED";
+  if (decision === "LOW_PRIORITY") return "LOW_PRIORITY";
+  if (decision === "REJECT") return "REJECTED";
+  return "REVIEW_REQUIRED";
+}
+
+function truncate(value: string | undefined, max: number): string | null {
+  if (!value) return null;
+  return value.length > max ? value.slice(0, max) : value;
+}
+
+function clampRating(value: number): number {
+  return Math.max(0, Math.min(100, value));
 }
 
 function fallbackResult(error: unknown): AnalysisResult {

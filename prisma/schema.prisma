@@ -11,6 +11,12 @@ model article {
   id                        Int                         @id @default(autoincrement())
   content                   String                      @db.LongText
   tag                       String
+  status                    String                      @default("PUBLISHED") @db.VarChar(32)
+  reviewDecision            String?                     @db.VarChar(32)
+  riskLevel                 String?                     @db.VarChar(32)
+  reviewReason              String?                     @db.VarChar(512)
+  reviewSuggestion          String?                     @db.VarChar(512)
+  reviewedAt                DateTime?
   posttime                  DateTime                    @default(now())
   authorId                  Int
   user                      user                        @relation(fields: [authorId], references: [id])
@@ -21,6 +27,7 @@ model article {
   comment                   comment[]
 
   @@index([authorId])
+  @@index([status, posttime])
 }
 
 model article_ai_analysis {

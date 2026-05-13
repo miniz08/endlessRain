@@ -21,18 +21,21 @@ import {
   assertPassword,
   assertString,
   assertUsername,
-  normalizeRole,
+  HttpError,
   optionalString,
 } from "../utils/validation.js";
 
 export async function register(req: Request, res: Response): Promise<void> {
+  if (req.body?.role !== undefined) {
+    throw new HttpError(400, "role cannot be set during public registration", "ROLE_NOT_ALLOWED");
+  }
+
   const username = assertUsername(req.body?.username);
   const email = assertEmail(req.body?.email);
   const password = assertPassword(req.body?.password);
   const avatar = optionalString(req.body?.avatar);
-  const role = normalizeRole(req.body?.role) ?? "user";
 
-  const result = await registerUser({ username, email, password, avatar, role });
+  const result = await registerUser({ username, email, password, avatar });
   attachAuthCookies(res, result.tokens);
   await writeAuditLog(req, "AUTH_REGISTER", "success", 201, `registered user ${result.user.id}`);
   res.status(201).json({

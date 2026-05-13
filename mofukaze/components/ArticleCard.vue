@@ -9,6 +9,9 @@
         <strong>{{ article.author.username }}</strong>
       </NuxtLink>
       <span>{{ formatTime(article.posttime) }}</span>
+      <span v-if="article.status !== 'PUBLISHED'" class="status-pill" :class="statusClass(article.status)">
+        {{ statusLabel(article.status) }}
+      </span>
     </div>
 
     <NuxtLink :to="`/article/${article.id}`">
@@ -38,7 +41,7 @@
       <span v-if="article.recommendation" class="muted">推荐分 {{ article.recommendation.total }}</span>
     </div>
 
-    <div class="reactions" style="margin-top: 10px">
+    <div v-if="isPublicArticle" class="reactions" style="margin-top: 10px">
       <button
         v-for="emoji in visibleEmojis"
         :key="emoji"
@@ -50,6 +53,9 @@
       </button>
       <span class="muted">共 {{ localReactions.total }}</span>
     </div>
+    <p v-else class="muted" style="margin-top: 10px">
+      内容暂未公开，评论和 reaction 已暂停。
+    </p>
   </article>
 </template>
 
@@ -70,6 +76,7 @@ const { isLoggedIn } = useAuth();
 const { blogApi } = useApi();
 const visibleEmojis = REACTION_EMOJIS.slice(0, 8);
 const localReactions = ref(props.article.reactions);
+const isPublicArticle = computed(() => props.article.status === "PUBLISHED" || props.article.status === "LOW_PRIORITY");
 const visibleTags = computed(() => {
   const seen = new Set([props.article.tag]);
   return [...props.article.manualTags, ...props.article.aiTags]
@@ -116,5 +123,19 @@ function formatTime(value: string) {
 
 function topicLink(tag: string) {
   return `/topic?tag=${encodeURIComponent(tag)}`;
+}
+
+function statusLabel(status: Article["status"]) {
+  if (status === "LOW_PRIORITY") return "低优先级";
+  if (status === "PENDING_REVIEW") return "待审核";
+  if (status === "REVIEW_REQUIRED") return "复核中";
+  if (status === "REJECTED") return "未通过";
+  return "公开";
+}
+
+function statusClass(status: Article["status"]) {
+  if (status === "LOW_PRIORITY" || status === "REVIEW_REQUIRED" || status === "PENDING_REVIEW") return "risk-mid";
+  if (status === "REJECTED") return "risk-high";
+  return "risk-low";
 }
 </script>

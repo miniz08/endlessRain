@@ -1,0 +1,39 @@
+flowchart LR
+  subgraph Client["客户端"]
+    Browser["Nuxt 3 / Vue 3 前端"]
+  end
+
+  subgraph Edge["统一入口"]
+    Nginx["Nginx 静态资源与反向代理"]
+    Gateway["api_gateway<br/>统一 /api 前缀<br/>路由、限流、健康监控"]
+  end
+
+  subgraph Services["业务服务层"]
+    UserService["user_service<br/>认证、权限、用户评级"]
+    BlogService["blog_service<br/>文章、评论、关注、通知、推荐"]
+    AiService["ai_service<br/>AI 内容评分与标签"]
+    ChatService["chat_service<br/>私信与 WebSocket"]
+  end
+
+  subgraph Data["共享数据层"]
+    MySQL[("MySQL<br/>业务数据与审计数据")]
+  end
+
+  subgraph External["外部模型服务"]
+    AiProvider["OpenAI-compatible Provider<br/>或 Mock Provider"]
+  end
+
+  Browser --> Nginx
+  Nginx --> Gateway
+  Gateway --> UserService
+  Gateway --> BlogService
+  Gateway --> AiService
+  Gateway --> ChatService
+  BlogService --> AiService
+  AiService --> AiProvider
+  UserService --> MySQL
+  BlogService --> MySQL
+  AiService --> MySQL
+  ChatService --> MySQL
+  Gateway --> MySQL
+

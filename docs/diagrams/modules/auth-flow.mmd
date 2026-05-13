@@ -1,0 +1,11 @@
+flowchart TD
+  A["用户提交注册/登录表单"] --> B["user_service 校验输入"]
+  B --> C{"校验通过?"}
+  C -- 否 --> D["返回错误并写入审计日志"]
+  C -- 是 --> E["密码哈希校验或新用户创建"]
+  E --> F["签发 access token / refresh token"]
+  F --> G["refresh token 哈希写入数据库"]
+  G --> H["前端保存登录态"]
+  H --> I["后续请求携带 Cookie 或 Bearer Token"]
+  I --> J["各服务鉴权中间件识别用户与角色"]
+

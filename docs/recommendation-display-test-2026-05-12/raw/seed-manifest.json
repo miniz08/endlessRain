@@ -1,0 +1,333 @@
+{
+  "runId": "rdisp_mp2lkdct_82d2ca",
+  "prefix": "rd_rdisp_mp2lkdct_82d2ca",
+  "users": {
+    "data_viewer": {
+      "key": "data_viewer",
+      "label": "数据型用户",
+      "preferredTopics": [
+        "data",
+        "ai",
+        "backend"
+      ],
+      "negativeTopics": [
+        "food",
+        "travel",
+        "gaming"
+      ],
+      "expectedTags": [
+        "数据分析",
+        "AI模型",
+        "后端架构"
+      ],
+      "id": 89,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_data_viewer",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_data_viewer@example.test"
+    },
+    "life_viewer": {
+      "key": "life_viewer",
+      "label": "生活型用户",
+      "preferredTopics": [
+        "design",
+        "travel",
+        "food",
+        "film"
+      ],
+      "negativeTopics": [
+        "security",
+        "finance"
+      ],
+      "expectedTags": [
+        "产品设计",
+        "旅行记录",
+        "生活方式",
+        "影像评论"
+      ],
+      "id": 90,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_life_viewer",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_life_viewer@example.test"
+    },
+    "security_viewer": {
+      "key": "security_viewer",
+      "label": "安全型用户",
+      "preferredTopics": [
+        "security",
+        "backend",
+        "finance"
+      ],
+      "negativeTopics": [
+        "gaming",
+        "food"
+      ],
+      "expectedTags": [
+        "安全审计",
+        "后端架构",
+        "金融观察"
+      ],
+      "id": 91,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_security_viewer",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_security_viewer@example.test"
+    }
+  },
+  "authors": [
+    {
+      "id": 92,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_data_high_0",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_data_high_1@example.test",
+      "topic": "data",
+      "tier": "high"
+    },
+    {
+      "id": 93,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_data_mid_1",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_data_mid_2@example.test",
+      "topic": "data",
+      "tier": "mid"
+    },
+    {
+      "id": 94,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_data_low_2",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_data_low_3@example.test",
+      "topic": "data",
+      "tier": "low"
+    },
+    {
+      "id": 95,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_ai_high_3",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_ai_high_4@example.test",
+      "topic": "ai",
+      "tier": "high"
+    },
+    {
+      "id": 96,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_ai_mid_4",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_ai_mid_5@example.test",
+      "topic": "ai",
+      "tier": "mid"
+    },
+    {
+      "id": 97,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_ai_low_5",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_ai_low_6@example.test",
+      "topic": "ai",
+      "tier": "low"
+    },
+    {
+      "id": 98,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_backend_high_6",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_backend_high_7@example.test",
+      "topic": "backend",
+      "tier": "high"
+    },
+    {
+      "id": 99,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_backend_mid_7",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_backend_mid_8@example.test",
+      "topic": "backend",
+      "tier": "mid"
+    },
+    {
+      "id": 100,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_backend_low_8",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_backend_low_9@example.test",
+      "topic": "backend",
+      "tier": "low"
+    },
+    {
+      "id": 101,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_security_high_9",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_security_high_10@example.test",
+      "topic": "security",
+      "tier": "high"
+    },
+    {
+      "id": 102,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_security_mid_10",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_security_mid_11@example.test",
+      "topic": "security",
+      "tier": "mid"
+    },
+    {
+      "id": 103,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_security_low_11",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_security_low_12@example.test",
+      "topic": "security",
+      "tier": "low"
+    },
+    {
+      "id": 104,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_frontend_high_12",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_frontend_high_13@example.test",
+      "topic": "frontend",
+      "tier": "high"
+    },
+    {
+      "id": 105,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_frontend_mid_13",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_frontend_mid_14@example.test",
+      "topic": "frontend",
+      "tier": "mid"
+    },
+    {
+      "id": 106,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_frontend_low_14",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_frontend_low_15@example.test",
+      "topic": "frontend",
+      "tier": "low"
+    },
+    {
+      "id": 107,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_design_high_15",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_design_high_16@example.test",
+      "topic": "design",
+      "tier": "high"
+    },
+    {
+      "id": 108,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_design_mid_16",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_design_mid_17@example.test",
+      "topic": "design",
+      "tier": "mid"
+    },
+    {
+      "id": 109,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_design_low_17",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_design_low_18@example.test",
+      "topic": "design",
+      "tier": "low"
+    },
+    {
+      "id": 110,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_travel_high_18",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_travel_high_19@example.test",
+      "topic": "travel",
+      "tier": "high"
+    },
+    {
+      "id": 111,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_travel_mid_19",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_travel_mid_20@example.test",
+      "topic": "travel",
+      "tier": "mid"
+    },
+    {
+      "id": 112,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_travel_low_20",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_travel_low_21@example.test",
+      "topic": "travel",
+      "tier": "low"
+    },
+    {
+      "id": 113,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_food_high_21",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_food_high_22@example.test",
+      "topic": "food",
+      "tier": "high"
+    },
+    {
+      "id": 114,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_food_mid_22",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_food_mid_23@example.test",
+      "topic": "food",
+      "tier": "mid"
+    },
+    {
+      "id": 115,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_food_low_23",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_food_low_24@example.test",
+      "topic": "food",
+      "tier": "low"
+    },
+    {
+      "id": 116,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_film_high_24",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_film_high_25@example.test",
+      "topic": "film",
+      "tier": "high"
+    },
+    {
+      "id": 117,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_film_mid_25",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_film_mid_26@example.test",
+      "topic": "film",
+      "tier": "mid"
+    },
+    {
+      "id": 118,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_film_low_26",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_film_low_27@example.test",
+      "topic": "film",
+      "tier": "low"
+    },
+    {
+      "id": 119,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_gaming_high_27",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_gaming_high_28@example.test",
+      "topic": "gaming",
+      "tier": "high"
+    },
+    {
+      "id": 120,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_gaming_mid_28",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_gaming_mid_29@example.test",
+      "topic": "gaming",
+      "tier": "mid"
+    },
+    {
+      "id": 121,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_gaming_low_29",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_gaming_low_30@example.test",
+      "topic": "gaming",
+      "tier": "low"
+    },
+    {
+      "id": 122,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_finance_high_30",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_finance_high_31@example.test",
+      "topic": "finance",
+      "tier": "high"
+    },
+    {
+      "id": 123,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_finance_mid_31",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_finance_mid_32@example.test",
+      "topic": "finance",
+      "tier": "mid"
+    },
+    {
+      "id": 124,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_finance_low_32",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_finance_low_33@example.test",
+      "topic": "finance",
+      "tier": "low"
+    },
+    {
+      "id": 125,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_fitness_high_33",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_fitness_high_34@example.test",
+      "topic": "fitness",
+      "tier": "high"
+    },
+    {
+      "id": 126,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_fitness_mid_34",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_fitness_mid_35@example.test",
+      "topic": "fitness",
+      "tier": "mid"
+    },
+    {
+      "id": 127,
+      "username": "rd_rdisp_mp2lkdct_82d2ca_author_fitness_low_35",
+      "email": "rd_rdisp_mp2lkdct_82d2ca_author_fitness_low_36@example.test",
+      "topic": "fitness",
+      "tier": "low"
+    }
+  ],
+  "articleCount": 291,
+  "special": {
+    "displayProbeTag": "rd_rdisp_mp2lkdct_82d2ca_display_low_priority",
+    "seenPenaltyArticleId": 598,
+    "unseenControlArticleId": 599,
+    "displayProbeArticleId": 600
+  }
+}

@@ -1,0 +1,91 @@
+[
+  {
+    "name": "gateway_health",
+    "totalRequests": 180,
+    "concurrency": 20,
+    "totalDurationMs": 120.3,
+    "throughputRps": 1496.32,
+    "success": 180,
+    "failed": 0,
+    "statusCounts": {
+      "200": 180
+    },
+    "latencyMs": {
+      "min": 6,
+      "avg": 12.71,
+      "p50": 11.53,
+      "p90": 20.05,
+      "p95": 22.29,
+      "p99": 23.37,
+      "max": 24.02
+    },
+    "errors": []
+  },
+  {
+    "name": "article_list",
+    "totalRequests": 160,
+    "concurrency": 16,
+    "totalDurationMs": 8049.58,
+    "throughputRps": 19.88,
+    "success": 160,
+    "failed": 0,
+    "statusCounts": {
+      "200": 160
+    },
+    "latencyMs": {
+      "min": 341.51,
+      "avg": 726.54,
+      "p50": 680.48,
+      "p90": 1204.24,
+      "p95": 1416.82,
+      "p99": 1708.15,
+      "max": 2275.18
+    },
+    "errors": []
+  },
+  {
+    "name": "recommended_feed",
+    "totalRequests": 160,
+    "concurrency": 16,
+    "totalDurationMs": 72515.6,
+    "throughputRps": 2.21,
+    "success": 158,
+    "failed": 2,
+    "statusCounts": {
+      "200": 158,
+      "500": 2
+    },
+    "latencyMs": {
+      "min": 5933.67,
+      "avg": 7121.23,
+      "p50": 6992.96,
+      "p90": 7409.43,
+      "p95": 8362.98,
+      "p99": 9454.93,
+      "max": 9602.07
+    },
+    "errors": []
+  },
+  {
+    "name": "auth_me",
+    "totalRequests": 100,
+    "concurrency": 10,
+    "totalDurationMs": 1081.56,
+    "throughputRps": 92.46,
+    "success": 100,
+    "failed": 0,
+    "statusCounts": {
+      "200": 100
+    },
+    "latencyMs": {
+      "min": 77.22,
+      "avg": 104.16,
+      "p50": 86.97,
+      "p90": 133.22,
+      "p95": 225.03,
+      "p99": 345.22,
+      "max": 360.01
+    },
+    "errors": []
+  }
+]

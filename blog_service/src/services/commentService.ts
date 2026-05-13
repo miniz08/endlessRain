@@ -14,9 +14,9 @@ export async function listArticleComments(input: {
 }) {
   const article = await prisma.article.findUnique({
     where: { id: input.articleId },
-    select: { id: true },
+    select: { id: true, status: true },
   });
-  if (!article) {
+  if (!article || !isPublicArticleStatus(article.status)) {
     throw new HttpError(404, "Article not found", "ARTICLE_NOT_FOUND");
   }
 
@@ -52,9 +52,9 @@ export async function createComment(input: {
 }) {
   const article = await prisma.article.findUnique({
     where: { id: input.articleId },
-    select: { id: true },
+    select: { id: true, status: true },
   });
-  if (!article) {
+  if (!article || !isPublicArticleStatus(article.status)) {
     throw new HttpError(404, "Article not found", "ARTICLE_NOT_FOUND");
   }
 
@@ -180,4 +180,8 @@ function toCommentDto(
     replyToUser: comment.user_comment_replyToUserIdTouser,
     reactions,
   };
+}
+
+function isPublicArticleStatus(status?: string | null): boolean {
+  return status === undefined || status === null || status === "PUBLISHED" || status === "LOW_PRIORITY";
 }

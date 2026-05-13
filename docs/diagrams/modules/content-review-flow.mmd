@@ -1,0 +1,21 @@
+flowchart TD
+  A["用户提交文章"] --> B["blog_service 校验并清洗内容"]
+  B --> C["写入 article<br/>status=PENDING_REVIEW"]
+  C --> D["调用 ai_service 分析"]
+  D --> E["生成评分、标签、riskLevel、decision"]
+  E --> F["持久化 AI 分析结果"]
+  F --> G{"decision"}
+  G -- ALLOW --> H["status=PUBLISHED"]
+  G -- LOW_PRIORITY --> I["status=LOW_PRIORITY"]
+  G -- REVIEW --> J["status=REVIEW_REQUIRED"]
+  G -- REJECT --> K["status=REJECTED"]
+  H --> L["进入公开展示"]
+  I --> L
+  J --> M["暂不公开，等待复核"]
+  K --> N["暂不公开"]
+  H --> O["通知作者审核通过"]
+  I --> O
+  J --> O
+  K --> O
+  O --> P["写入审计日志"]
+

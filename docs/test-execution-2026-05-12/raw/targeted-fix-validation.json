@@ -1,0 +1,195 @@
+{
+  "runId": "mp2ekb2ja267",
+  "gatewayBase": "http://127.0.0.1:3001",
+  "wsBase": "ws://127.0.0.1:3001",
+  "startedAt": "2026-05-12T09:02:42.956Z",
+  "endedAt": "2026-05-12T09:03:27.767Z",
+  "passed": 7,
+  "failed": 0,
+  "error": null,
+  "results": [
+    {
+      "id": "FIX-SEC-001",
+      "name": "public registration rejects client-supplied role",
+      "pass": true,
+      "detail": {
+        "status": 400,
+        "body": {
+          "error": {
+            "code": "ROLE_NOT_ALLOWED",
+            "message": "role cannot be set during public registration",
+            "requestId": "fix-mp2ekb2ja267-2848e89c-4579-41d0-bdee-5ce487393738"
+          }
+        }
+      },
+      "checkedAt": "2026-05-12T09:02:43.508Z"
+    },
+    {
+      "id": "FIX-AUTH-A",
+      "name": "normal registration creates user role for a",
+      "pass": true,
+      "detail": {
+        "status": 201,
+        "user": {
+          "id": 48,
+          "username": "fix_a_mp2ekb2ja267",
+          "email": "fix_a_mp2ekb2ja267@example.com",
+          "avatar": null,
+          "bio": null,
+          "role": "user",
+          "professionalism": 0,
+          "friendliness": 0,
+          "createdAt": "2026-05-12T09:02:43.863Z",
+          "updatedAt": "2026-05-12T09:02:43.863Z"
+        }
+      },
+      "checkedAt": "2026-05-12T09:02:44.586Z"
+    },
+    {
+      "id": "FIX-AUTH-B",
+      "name": "normal registration creates user role for b",
+      "pass": true,
+      "detail": {
+        "status": 201,
+        "user": {
+          "id": 49,
+          "username": "fix_b_mp2ekb2ja267",
+          "email": "fix_b_mp2ekb2ja267@example.com",
+          "avatar": null,
+          "bio": null,
+          "role": "user",
+          "professionalism": 0,
+          "friendliness": 0,
+          "createdAt": "2026-05-12T09:02:44.884Z",
+          "updatedAt": "2026-05-12T09:02:44.884Z"
+        }
+      },
+      "checkedAt": "2026-05-12T09:02:45.425Z"
+    },
+    {
+      "id": "FIX-WS-THREAD",
+      "name": "chat thread can be created through gateway",
+      "pass": true,
+      "detail": {
+        "status": 201,
+        "body": {
+          "item": {
+            "id": 15,
+            "userAId": 48,
+            "userBId": 49,
+            "createdAt": "2026-05-12T09:02:45.846Z",
+            "counterpart": {
+              "id": 49,
+              "username": "fix_b_mp2ekb2ja267",
+              "avatar": null,
+              "role": "user"
+            },
+            "lastMessage": null
+          }
+        }
+      },
+      "checkedAt": "2026-05-12T09:02:46.663Z"
+    },
+    {
+      "id": "FIX-WS-READY",
+      "name": "authenticated websocket clients receive ready through gateway",
+      "pass": true,
+      "detail": {
+        "aMessages": [
+          {
+            "type": "ready",
+            "userId": 48
+          },
+          {
+            "type": "message_created",
+            "message": {
+              "id": 616,
+              "threadId": 15,
+              "senderId": 48,
+              "content": "targeted websocket validation message",
+              "createdAt": "2026-05-12T09:02:47.203Z",
+              "sender": {
+                "id": 48,
+                "username": "fix_a_mp2ekb2ja267",
+                "avatar": null,
+                "role": "user"
+              }
+            },
+            "clientId": "fix-ws-mp2ekb2ja267"
+          }
+        ],
+        "bMessages": [
+          {
+            "type": "ready",
+            "userId": 49
+          },
+          {
+            "type": "message_created",
+            "message": {
+              "id": 616,
+              "threadId": 15,
+              "senderId": 48,
+              "content": "targeted websocket validation message",
+              "createdAt": "2026-05-12T09:02:47.203Z",
+              "sender": {
+                "id": 48,
+                "username": "fix_a_mp2ekb2ja267",
+                "avatar": null,
+                "role": "user"
+              }
+            },
+            "clientId": "fix-ws-mp2ekb2ja267"
+          }
+        ]
+      },
+      "checkedAt": "2026-05-12T09:02:47.113Z"
+    },
+    {
+      "id": "FIX-WS-DELIVERY",
+      "name": "websocket message is delivered through gateway",
+      "pass": true,
+      "detail": {
+        "clientId": "fix-ws-mp2ekb2ja267",
+        "bMessages": [
+          {
+            "type": "ready",
+            "userId": 49
+          },
+          {
+            "type": "message_created",
+            "message": {
+              "id": 616,
+              "threadId": 15,
+              "senderId": 48,
+              "content": "targeted websocket validation message",
+              "createdAt": "2026-05-12T09:02:47.203Z",
+              "sender": {
+                "id": 48,
+                "username": "fix_a_mp2ekb2ja267",
+                "avatar": null,
+                "role": "user"
+              }
+            },
+            "clientId": "fix-ws-mp2ekb2ja267"
+          }
+        ]
+      },
+      "checkedAt": "2026-05-12T09:02:47.549Z"
+    },
+    {
+      "id": "FIX-PRESSURE-RECO",
+      "name": "recommended feed has no 500 under focused concurrent load",
+      "pass": true,
+      "detail": {
+        "total": 160,
+        "concurrency": 16,
+        "statuses": {
+          "200": 160
+        },
+        "p95Ms": 5032.99,
+        "maxMs": 5267.56
+      },
+      "checkedAt": "2026-05-12T09:03:27.767Z"
+    }
+  ]
+}

@@ -50,7 +50,13 @@
 
     <div v-if="lastResult" class="publish-result">
       <div class="row" style="justify-content: space-between">
-        <strong>发布成功</strong>
+        <div>
+          <strong>{{ reviewTitle(lastResult.review.status) }}</strong>
+          <p class="muted" style="margin: 4px 0 0">{{ reviewBody(lastResult) }}</p>
+        </div>
+        <span class="status-pill" :class="reviewClass(lastResult.review.status)">
+          {{ reviewStatusLabel(lastResult.review.status) }}
+        </span>
         <NuxtLink :to="`/article/${lastResult.article.id}`">
           <button class="ghost">查看</button>
         </NuxtLink>
@@ -113,6 +119,32 @@ async function submitArticle() {
 
 function parseTags(value: string) {
   return [...new Set(value.split(/[,，\s]+/).map((item) => item.trim()).filter(Boolean))].slice(0, 8);
+}
+
+function reviewTitle(status: CreateArticleResponse["review"]["status"]) {
+  if (status === "PUBLISHED") return "审核通过";
+  if (status === "LOW_PRIORITY") return "已发布，展示优先级较低";
+  if (status === "REJECTED") return "未通过审核";
+  if (status === "REVIEW_REQUIRED") return "已进入复核";
+  return "等待审核";
+}
+
+function reviewStatusLabel(status: CreateArticleResponse["review"]["status"]) {
+  if (status === "PUBLISHED") return "公开";
+  if (status === "LOW_PRIORITY") return "降权";
+  if (status === "REJECTED") return "拒绝";
+  if (status === "REVIEW_REQUIRED") return "复核";
+  return "待审";
+}
+
+function reviewClass(status: CreateArticleResponse["review"]["status"]) {
+  if (status === "PUBLISHED") return "risk-low";
+  if (status === "LOW_PRIORITY" || status === "REVIEW_REQUIRED") return "risk-mid";
+  return "risk-high";
+}
+
+function reviewBody(payload: CreateArticleResponse) {
+  return payload.review.reason || payload.review.suggestion || payload.article.reviewReason || "处理结果已同步到通知中心。";
 }
 
 function insertFormula(block: boolean) {

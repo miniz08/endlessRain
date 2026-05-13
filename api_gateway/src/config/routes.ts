@@ -4,6 +4,7 @@ export type GatewayRoute = {
   targetEnv: string;
   defaultTarget: string;
   stripPrefix?: string;
+  supportsWebSocket?: boolean;
 };
 
 export const gatewayRoutes: GatewayRoute[] = [
@@ -97,6 +98,7 @@ export const gatewayRoutes: GatewayRoute[] = [
     targetEnv: "CHAT_SERVICE_URL",
     defaultTarget: "http://127.0.0.1:3005",
     stripPrefix: "/api",
+    supportsWebSocket: true,
   },
 ];
 

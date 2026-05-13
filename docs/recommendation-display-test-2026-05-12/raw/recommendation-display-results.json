@@ -1,0 +1,1067 @@
+{
+  "runId": "rdisp_mp2lkdct_82d2ca",
+  "prefix": "rd_rdisp_mp2lkdct_82d2ca",
+  "gatewayBase": "http://127.0.0.1:3001",
+  "startedAt": "2026-05-12T12:18:43.230Z",
+  "endedAt": "2026-05-12T12:23:51.797Z",
+  "seed": {
+    "viewers": 3,
+    "authors": 36,
+    "articles": 291,
+    "publicArticles": 255,
+    "lowPriorityArticles": 37,
+    "privateArticles": 36,
+    "recoEvents": 1021,
+    "seenRecords": 1
+  },
+  "validations": [
+    {
+      "id": "LOGIN-data_viewer",
+      "name": "数据型用户 can login",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "userId": 89
+      },
+      "checkedAt": "2026-05-12T12:21:33.272Z"
+    },
+    {
+      "id": "PROFILE-data_viewer",
+      "name": "数据型用户 profile contains expected tags",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "topTags": [
+          "数据分析",
+          "AI模型",
+          "后端架构",
+          "微服务",
+          "内容治理",
+          "社区运营",
+          "旅行记录",
+          "生活方式"
+        ],
+        "updatedFromEvents": 315
+      },
+      "checkedAt": "2026-05-12T12:21:38.022Z"
+    },
+    {
+      "id": "RECO-data_viewer",
+      "name": "数据型用户 recommendation is personalized",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "batchCount": 22,
+        "preferredCount": 20,
+        "preferredRatio": 1,
+        "highAuthorCount": 14,
+        "lowPriorityInTop20": 0,
+        "privateCount": 0,
+        "topTopics": {
+          "data": 10,
+          "ai": 6,
+          "backend": 4
+        },
+        "topItems": [
+          {
+            "id": 310,
+            "topic": "data",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.4967,
+            "tagMatch": 1.8561,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "数据分析",
+              "AI模型",
+              "后端架构"
+            ]
+          },
+          {
+            "id": 599,
+            "topic": "data",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.4967,
+            "tagMatch": 1.8561,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "数据分析",
+              "AI模型",
+              "后端架构"
+            ]
+          },
+          {
+            "id": 346,
+            "topic": "data",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.4967,
+            "tagMatch": 1.8561,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "数据分析",
+              "AI模型",
+              "后端架构"
+            ]
+          },
+          {
+            "id": 382,
+            "topic": "data",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.4967,
+            "tagMatch": 1.8561,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "数据分析",
+              "AI模型",
+              "后端架构"
+            ]
+          },
+          {
+            "id": 418,
+            "topic": "data",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.4967,
+            "tagMatch": 1.8561,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "数据分析",
+              "AI模型",
+              "后端架构"
+            ]
+          }
+        ]
+      },
+      "checkedAt": "2026-05-12T12:21:51.346Z"
+    },
+    {
+      "id": "LOGIN-life_viewer",
+      "name": "生活型用户 can login",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "userId": 90
+      },
+      "checkedAt": "2026-05-12T12:21:51.982Z"
+    },
+    {
+      "id": "PROFILE-life_viewer",
+      "name": "生活型用户 profile contains expected tags",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "topTags": [
+          "社区运营",
+          "产品设计",
+          "旅行记录",
+          "生活方式",
+          "影像评论",
+          "前端体验",
+          "安全审计",
+          "金融观察"
+        ],
+        "updatedFromEvents": 401
+      },
+      "checkedAt": "2026-05-12T12:21:52.865Z"
+    },
+    {
+      "id": "RECO-life_viewer",
+      "name": "生活型用户 recommendation is personalized",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "batchCount": 24,
+        "preferredCount": 20,
+        "preferredRatio": 1,
+        "highAuthorCount": 12,
+        "lowPriorityInTop20": 0,
+        "privateCount": 0,
+        "topTopics": {
+          "travel": 6,
+          "food": 6,
+          "design": 5,
+          "film": 3
+        },
+        "topItems": [
+          {
+            "id": 328,
+            "topic": "travel",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 16.1678,
+            "tagMatch": 1.5909,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "社区运营",
+              "旅行记录",
+              "生活方式"
+            ]
+          },
+          {
+            "id": 331,
+            "topic": "food",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 16.1678,
+            "tagMatch": 1.5909,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "社区运营",
+              "旅行记录",
+              "生活方式"
+            ]
+          },
+          {
+            "id": 364,
+            "topic": "travel",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 16.1678,
+            "tagMatch": 1.5909,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "社区运营",
+              "旅行记录",
+              "生活方式"
+            ]
+          },
+          {
+            "id": 367,
+            "topic": "food",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 16.1678,
+            "tagMatch": 1.5909,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "社区运营",
+              "旅行记录",
+              "生活方式"
+            ]
+          },
+          {
+            "id": 400,
+            "topic": "travel",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 16.1678,
+            "tagMatch": 1.5909,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "社区运营",
+              "旅行记录",
+              "生活方式"
+            ]
+          }
+        ]
+      },
+      "checkedAt": "2026-05-12T12:22:05.572Z"
+    },
+    {
+      "id": "LOGIN-security_viewer",
+      "name": "安全型用户 can login",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "userId": 91
+      },
+      "checkedAt": "2026-05-12T12:22:06.755Z"
+    },
+    {
+      "id": "PROFILE-security_viewer",
+      "name": "安全型用户 profile contains expected tags",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "topTags": [
+          "后端架构",
+          "安全审计",
+          "数据分析",
+          "金融观察",
+          "微服务",
+          "内容治理",
+          "社区运营",
+          "游戏讨论"
+        ],
+        "updatedFromEvents": 305
+      },
+      "checkedAt": "2026-05-12T12:22:07.412Z"
+    },
+    {
+      "id": "RECO-security_viewer",
+      "name": "安全型用户 recommendation is personalized",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "batchCount": 22,
+        "preferredCount": 20,
+        "preferredRatio": 1,
+        "highAuthorCount": 11,
+        "lowPriorityInTop20": 0,
+        "privateCount": 0,
+        "topTopics": {
+          "security": 8,
+          "finance": 4,
+          "backend": 8
+        },
+        "topItems": [
+          {
+            "id": 319,
+            "topic": "security",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.5221,
+            "tagMatch": 1.8625,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "内容治理",
+              "后端架构",
+              "安全审计"
+            ]
+          },
+          {
+            "id": 355,
+            "topic": "security",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.5221,
+            "tagMatch": 1.8625,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "内容治理",
+              "后端架构",
+              "安全审计"
+            ]
+          },
+          {
+            "id": 391,
+            "topic": "security",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.5221,
+            "tagMatch": 1.8625,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "内容治理",
+              "后端架构",
+              "安全审计"
+            ]
+          },
+          {
+            "id": 427,
+            "topic": "security",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.5221,
+            "tagMatch": 1.8625,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "内容治理",
+              "后端架构",
+              "安全审计"
+            ]
+          },
+          {
+            "id": 340,
+            "topic": "finance",
+            "status": "PUBLISHED",
+            "authorTier": "high",
+            "total": 17.2432,
+            "tagMatch": 1.7927,
+            "authorQuality": 0.82,
+            "riskPenalty": 0,
+            "seenPenalty": 0,
+            "tags": [
+              "数据分析",
+              "安全审计",
+              "金融观察"
+            ]
+          }
+        ]
+      },
+      "checkedAt": "2026-05-12T12:22:18.688Z"
+    },
+    {
+      "id": "RECO-DIVERGENCE",
+      "name": "different profiles produce different recommendation topic sets",
+      "pass": true,
+      "detail": {
+        "dataTopics": [
+          "data",
+          "ai"
+        ],
+        "lifeTopics": [
+          "travel",
+          "food",
+          "design",
+          "film"
+        ],
+        "securityTopics": [
+          "security",
+          "finance",
+          "backend"
+        ],
+        "dataLifeOverlap": 0,
+        "dataSecurityOverlap": 0
+      },
+      "checkedAt": "2026-05-12T12:22:18.689Z"
+    },
+    {
+      "id": "DISPLAY-PUBLIC-FILTER",
+      "name": "public article display only returns public batch statuses",
+      "pass": true,
+      "detail": {
+        "status": 200,
+        "taggedStatus": 200,
+        "batchItems": 30,
+        "taggedBatchItems": 1,
+        "lowPriorityProbeFound": true,
+        "lowPriorityProbeArticleId": 600,
+        "displayProbeTag": "rd_rdisp_mp2lkdct_82d2ca_display_low_priority",
+        "privateItems": [],
+        "taggedPrivateItems": []
+      },
+      "checkedAt": "2026-05-12T12:22:20.457Z"
+    },
+    {
+      "id": "RECO-SEEN-PENALTY",
+      "name": "seen penalty lowers an otherwise comparable article",
+      "pass": true,
+      "detail": {
+        "seenPenaltyArticleId": 598,
+        "unseenControlArticleId": 599,
+        "seenIndex": 13,
+        "unseenIndex": 1,
+        "seenItem": {
+          "id": 598,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.4967,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 2,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        },
+        "unseenItem": {
+          "id": 599,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.4967,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        }
+      },
+      "checkedAt": "2026-05-12T12:22:20.457Z"
+    },
+    {
+      "id": "RECO-PRESSURE-LARGE-DATA",
+      "name": "recommended feed remains stable with generated large dataset",
+      "pass": true,
+      "detail": {
+        "total": 80,
+        "concurrency": 10,
+        "statuses": {
+          "200": 80
+        },
+        "p95Ms": 13696.76,
+        "maxMs": 14226.67
+      },
+      "checkedAt": "2026-05-12T12:23:51.796Z"
+    }
+  ],
+  "artifacts": {
+    "manifest": {
+      "viewerIds": {
+        "data_viewer": 89,
+        "life_viewer": 90,
+        "security_viewer": 91
+      },
+      "seenPenaltyArticleId": 598,
+      "unseenControlArticleId": 599,
+      "displayProbeArticleId": 600,
+      "displayProbeTag": "rd_rdisp_mp2lkdct_82d2ca_display_low_priority"
+    },
+    "profiles": {
+      "data_viewer": {
+        "topTags": [
+          "数据分析",
+          "AI模型",
+          "后端架构",
+          "微服务",
+          "内容治理",
+          "社区运营",
+          "旅行记录",
+          "生活方式",
+          "游戏讨论",
+          "前端体验"
+        ],
+        "updatedFromEvents": 315
+      },
+      "life_viewer": {
+        "topTags": [
+          "社区运营",
+          "产品设计",
+          "旅行记录",
+          "生活方式",
+          "影像评论",
+          "前端体验",
+          "安全审计",
+          "金融观察",
+          "内容治理",
+          "数据分析"
+        ],
+        "updatedFromEvents": 401
+      },
+      "security_viewer": {
+        "topTags": [
+          "后端架构",
+          "安全审计",
+          "数据分析",
+          "金融观察",
+          "微服务",
+          "内容治理",
+          "社区运营",
+          "游戏讨论",
+          "生活方式",
+          "前端体验"
+        ],
+        "updatedFromEvents": 305
+      }
+    },
+    "recommendations": {
+      "data_viewer": [
+        {
+          "id": 310,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.4967,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        },
+        {
+          "id": 599,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.4967,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        },
+        {
+          "id": 346,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.4967,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        },
+        {
+          "id": 382,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.4967,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        },
+        {
+          "id": 418,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.4967,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        },
+        {
+          "id": 313,
+          "topic": "ai",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.8926,
+          "tagMatch": 1.5662,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "数据分析",
+            "AI模型"
+          ]
+        },
+        {
+          "id": 349,
+          "topic": "ai",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.8926,
+          "tagMatch": 1.5662,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "数据分析",
+            "AI模型"
+          ]
+        },
+        {
+          "id": 385,
+          "topic": "ai",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.8926,
+          "tagMatch": 1.5662,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "数据分析",
+            "AI模型"
+          ]
+        },
+        {
+          "id": 421,
+          "topic": "ai",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.8926,
+          "tagMatch": 1.5662,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "数据分析",
+            "AI模型"
+          ]
+        },
+        {
+          "id": 311,
+          "topic": "data",
+          "status": "PUBLISHED",
+          "authorTier": "mid",
+          "total": 15.7783,
+          "tagMatch": 1.8561,
+          "authorQuality": 0.46,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "AI模型",
+            "后端架构"
+          ]
+        }
+      ],
+      "life_viewer": [
+        {
+          "id": 328,
+          "topic": "travel",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 16.1678,
+          "tagMatch": 1.5909,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "社区运营",
+            "旅行记录",
+            "生活方式"
+          ]
+        },
+        {
+          "id": 331,
+          "topic": "food",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 16.1678,
+          "tagMatch": 1.5909,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "社区运营",
+            "旅行记录",
+            "生活方式"
+          ]
+        },
+        {
+          "id": 364,
+          "topic": "travel",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 16.1678,
+          "tagMatch": 1.5909,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "社区运营",
+            "旅行记录",
+            "生活方式"
+          ]
+        },
+        {
+          "id": 367,
+          "topic": "food",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 16.1678,
+          "tagMatch": 1.5909,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "社区运营",
+            "旅行记录",
+            "生活方式"
+          ]
+        },
+        {
+          "id": 400,
+          "topic": "travel",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 16.1678,
+          "tagMatch": 1.5909,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "社区运营",
+            "旅行记录",
+            "生活方式"
+          ]
+        },
+        {
+          "id": 403,
+          "topic": "food",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 16.1678,
+          "tagMatch": 1.5909,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "社区运营",
+            "旅行记录",
+            "生活方式"
+          ]
+        },
+        {
+          "id": 325,
+          "topic": "design",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.513,
+          "tagMatch": 1.3647,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "前端体验",
+            "产品设计",
+            "社区运营"
+          ]
+        },
+        {
+          "id": 361,
+          "topic": "design",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.513,
+          "tagMatch": 1.3647,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "前端体验",
+            "产品设计",
+            "社区运营"
+          ]
+        },
+        {
+          "id": 397,
+          "topic": "design",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.513,
+          "tagMatch": 1.3647,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "前端体验",
+            "产品设计",
+            "社区运营"
+          ]
+        },
+        {
+          "id": 334,
+          "topic": "film",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 15.2629,
+          "tagMatch": 1.3647,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "产品设计",
+            "社区运营",
+            "影像评论"
+          ]
+        }
+      ],
+      "security_viewer": [
+        {
+          "id": 319,
+          "topic": "security",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.5221,
+          "tagMatch": 1.8625,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "后端架构",
+            "安全审计"
+          ]
+        },
+        {
+          "id": 355,
+          "topic": "security",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.5221,
+          "tagMatch": 1.8625,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "后端架构",
+            "安全审计"
+          ]
+        },
+        {
+          "id": 391,
+          "topic": "security",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.5221,
+          "tagMatch": 1.8625,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "后端架构",
+            "安全审计"
+          ]
+        },
+        {
+          "id": 427,
+          "topic": "security",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.5221,
+          "tagMatch": 1.8625,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "内容治理",
+            "后端架构",
+            "安全审计"
+          ]
+        },
+        {
+          "id": 340,
+          "topic": "finance",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.2432,
+          "tagMatch": 1.7927,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "安全审计",
+            "金融观察"
+          ]
+        },
+        {
+          "id": 376,
+          "topic": "finance",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.2432,
+          "tagMatch": 1.7927,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "安全审计",
+            "金融观察"
+          ]
+        },
+        {
+          "id": 412,
+          "topic": "finance",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.2432,
+          "tagMatch": 1.7927,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "安全审计",
+            "金融观察"
+          ]
+        },
+        {
+          "id": 316,
+          "topic": "backend",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.24,
+          "tagMatch": 1.7928,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "后端架构",
+            "微服务"
+          ]
+        },
+        {
+          "id": 352,
+          "topic": "backend",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.24,
+          "tagMatch": 1.7928,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "后端架构",
+            "微服务"
+          ]
+        },
+        {
+          "id": 388,
+          "topic": "backend",
+          "status": "PUBLISHED",
+          "authorTier": "high",
+          "total": 17.24,
+          "tagMatch": 1.7928,
+          "authorQuality": 0.82,
+          "riskPenalty": 0,
+          "seenPenalty": 0,
+          "tags": [
+            "数据分析",
+            "后端架构",
+            "微服务"
+          ]
+        }
+      ]
+    }
+  },
+  "passed": 13,
+  "failed": 0
+}

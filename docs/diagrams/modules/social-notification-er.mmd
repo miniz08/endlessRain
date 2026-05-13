@@ -1,0 +1,66 @@
+erDiagram
+  USER ||--o{ FOLLOW : follows
+  USER ||--o{ COMMENT : writes
+  ARTICLE ||--o{ COMMENT : has
+  COMMENT ||--o{ COMMENT : replies
+  USER ||--o{ ARTICLE_REACTION : reacts
+  ARTICLE ||--o{ ARTICLE_REACTION : receives
+  USER ||--o{ COMMENT_REACTION : reacts
+  COMMENT ||--o{ COMMENT_REACTION : receives
+  USER ||--o{ NOTIFICATION : receives
+  USER ||--o{ NOTIFICATION : acts
+  ARTICLE ||--o{ NOTIFICATION : related_article
+  COMMENT ||--o{ NOTIFICATION : related_comment
+
+  USER {
+    int id PK
+    varchar username
+    varchar avatar
+  }
+
+  FOLLOW {
+    int id PK
+    int followerId FK
+    int followingId FK
+    enum status
+  }
+
+  COMMENT {
+    int id PK
+    int userId FK
+    int articleId FK
+    int parentId FK
+    int replyToUserId FK
+    varchar status
+  }
+
+  ARTICLE_REACTION {
+    int id PK
+    int articleId FK
+    int userId FK
+    varchar emoji
+  }
+
+  COMMENT_REACTION {
+    int id PK
+    int commentId FK
+    int userId FK
+    varchar emoji
+  }
+
+  NOTIFICATION {
+    bigint id PK
+    int userId FK
+    varchar type
+    varchar title
+    varchar body
+    int actorId FK
+    int articleId FK
+    int commentId FK
+    datetime readAt
+  }
+
+  ARTICLE {
+    int id PK
+    int authorId FK
+  }

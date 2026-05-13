@@ -31,7 +31,7 @@ export function handleProxyUpgrade(
 ): boolean {
   const path = req.url ?? "/";
   const pathname = new URL(path, `http://${req.headers.host ?? "localhost"}`).pathname;
-  const match = registered.find(({ route }) => matchesRoutePrefix(pathname, route.prefix));
+  const match = registered.find(({ route }) => route.supportsWebSocket && matchesRoutePrefix(pathname, route.prefix));
   if (!match?.proxy.upgrade) return false;
 
   req.url = rewritePath(req, match.route);
@@ -45,7 +45,7 @@ function createGatewayProxy(route: GatewayRoute) {
     target,
     changeOrigin: true,
     xfwd: true,
-    ws: true,
+    ws: route.supportsWebSocket === true,
     pathRewrite: (_path, req) => rewritePath(req, route),
     on: {
       proxyReq(proxyReq, req) {

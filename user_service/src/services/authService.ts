@@ -83,7 +83,6 @@ export async function registerUser(input: {
   email: string;
   password: string;
   avatar?: string;
-  role?: string;
 }): Promise<{ user: PublicUser; tokens: TokenSet }> {
   const existing = await prisma.user.findFirst({
     where: {
@@ -104,7 +103,7 @@ export async function registerUser(input: {
       email: input.email,
       password: passwordHash,
       avatar: input.avatar,
-      role: input.role ?? "user",
+      role: "user",
     },
   });
 

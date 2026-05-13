@@ -1,0 +1,66 @@
+erDiagram
+  USER ||--|| RECO_USER_PROFILE : has
+  USER ||--o{ RECO_EVENT : produces
+  ARTICLE ||--o{ RECO_EVENT : receives
+  USER ||--o{ RECO_USER_SEEN : records
+  ARTICLE ||--o{ RECO_USER_SEEN : seen_as
+  ARTICLE ||--o{ RECO_ARTICLE_DAILY_STAT : aggregates
+  RECO_REQUEST_LOG ||--o{ RECO_EVENT : groups
+
+  USER {
+    int id PK
+    int professionalism
+    int friendliness
+  }
+
+  ARTICLE {
+    int id PK
+    int authorId FK
+    varchar status
+    varchar riskLevel
+  }
+
+  RECO_USER_PROFILE {
+    int userId PK
+    json tagVector
+    json authorAffinity
+    datetime updatedAt
+  }
+
+  RECO_EVENT {
+    int id PK
+    int userId FK
+    int articleId FK
+    enum eventType
+    int dwellMs
+    int position
+    varchar scene
+    varchar requestId FK
+  }
+
+  RECO_REQUEST_LOG {
+    varchar requestId PK
+    int userId FK
+    varchar scene
+    int candidateCount
+    json resultIds
+  }
+
+  RECO_USER_SEEN {
+    int userId PK
+    int articleId PK
+    int seenCount
+    datetime lastSeenAt
+  }
+
+  RECO_ARTICLE_DAILY_STAT {
+    int articleId PK
+    date statDate PK
+    int impressions
+    int clicks
+    int likes
+    int comments
+    int reports
+    double qualityScore
+  }
+

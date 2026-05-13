@@ -1,7 +1,15 @@
 import type { Request, Response } from "express";
 import { writeAuditLog } from "../services/auditService.js";
-import { createArticle, deleteArticle, getArticle, listArticleTags, listArticles, type ArticleAiProcessing } from "../services/articleService.js";
-import { notifyArticlePublished } from "../services/notificationService.js";
+import {
+  createArticle,
+  deleteArticle,
+  getArticle,
+  isPublicArticleStatus,
+  listArticleTags,
+  listArticles,
+  type ArticleAiProcessing,
+} from "../services/articleService.js";
+import { notifyArticleReviewResult } from "../services/notificationService.js";
 import { buildArticleReactionSummaries, toggleArticleReaction } from "../services/reactionService.js";
 import { recordRecoEvent } from "../services/recoEventService.js";
 import {
@@ -18,6 +26,7 @@ export async function listArticlesController(req: Request, res: Response): Promi
   const pagination = parsePagination(req.query);
   const payload = await listArticles({
     viewerId: req.auth?.id,
+    viewerRole: req.auth?.role,
     authorId: optionalPositiveInt(req.query.authorId, "authorId"),
     tag: optionalString(req.query.tag, "tag"),
     ...pagination,
@@ -33,14 +42,16 @@ export async function listArticleTagsController(req: Request, res: Response): Pr
 
 export async function getArticleController(req: Request, res: Response): Promise<void> {
   const articleId = positiveInt(req.params.articleId, "articleId");
-  const article = await getArticle(articleId, req.auth?.id);
-  await recordRecoEvent({
-    userId: req.auth?.id,
-    articleId,
-    eventType: "CLICK",
-    scene: "article_detail",
-    requestId: req.requestId,
-  });
+  const article = await getArticle(articleId, req.auth);
+  if (isPublicArticleStatus(article.status)) {
+    await recordRecoEvent({
+      userId: req.auth?.id,
+      articleId,
+      eventType: "CLICK",
+      scene: "article_detail",
+      requestId: req.requestId,
+    });
+  }
   res.json({ article });
 }
 
@@ -71,8 +82,13 @@ export async function createArticleController(req: Request, res: Response): Prom
     payload.ai.ok ? 200 : 502,
     summarizeAiAudit(payload.ai),
   );
-  await notifyArticlePublished(req.auth!.id, payload.article.id);
-  res.status(201).json({ article: payload.article });
+  await notifyArticleReviewResult({
+    userId: req.auth!.id,
+    articleId: payload.article.id,
+    ...payload.review,
+    decision: payload.ai.status === "failed" ? "FAILED" : payload.review.decision,
+  });
+  res.status(201).json({ article: payload.article, review: payload.review });
 }
 
 export async function deleteArticleController(req: Request, res: Response): Promise<void> {
@@ -84,7 +100,7 @@ export async function deleteArticleController(req: Request, res: Response): Prom
 
 export async function getArticleReactionsController(req: Request, res: Response): Promise<void> {
   const articleId = positiveInt(req.params.articleId, "articleId");
-  await getArticle(articleId, req.auth?.id);
+  await getArticle(articleId, req.auth);
   const summary = (await buildArticleReactionSummaries([articleId], req.auth?.id)).get(articleId);
   res.json({ summary });
 }

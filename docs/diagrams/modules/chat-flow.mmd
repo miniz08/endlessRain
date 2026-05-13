@@ -1,0 +1,9 @@
+flowchart TD
+  A["用户进入聊天页或个人页私聊入口"] --> B["chat_service 校验登录态"]
+  B --> C["查找或创建 chat_thread"]
+  C --> D["前端建立 WebSocket 连接"]
+  D --> E["用户发送消息"]
+  E --> F["写入 chat_message"]
+  F --> G["WebSocket 推送给会话双方"]
+  G --> H["刷新或离线后通过 REST 拉取历史消息"]
+

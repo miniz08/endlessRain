@@ -82,9 +82,9 @@ export async function buildCommentReactionSummaries(
 export async function toggleArticleReaction(articleId: number, userId: number, emoji: string) {
   const article = await prisma.article.findUnique({
     where: { id: articleId },
-    select: { id: true },
+    select: { id: true, status: true },
   });
-  if (!article) {
+  if (!article || !isPublicArticleStatus(article.status)) {
     throw new HttpError(404, "Article not found", "ARTICLE_NOT_FOUND");
   }
 
@@ -164,4 +164,8 @@ function sortSummaries(summaries: Map<number, ReactionSummary>): void {
     summary.counts.sort((a, b) => b.count - a.count || a.emoji.localeCompare(b.emoji));
     summary.myReactions.sort((a, b) => a.localeCompare(b));
   }
+}
+
+function isPublicArticleStatus(status?: string | null): boolean {
+  return status === undefined || status === null || status === "PUBLISHED" || status === "LOW_PRIORITY";
 }

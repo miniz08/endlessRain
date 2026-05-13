@@ -62,9 +62,24 @@
         </div>
       </section>
 
-      <aside class="panel">
-        <h3>关系概览</h3>
-        <p class="muted">关注关系会参与关注时间线，关注作者事件会进入推荐画像的作者亲和度。</p>
+      <aside class="stack">
+        <div class="panel">
+          <h3>综合评级</h3>
+          <p v-if="rating" class="muted">
+            等级 {{ rating.computed.level }} / 综合分 {{ rating.computed.combinedScore }}
+          </p>
+          <p v-if="rating" class="muted">
+            内容 {{ rating.computed.contentQualityScore }} / 合规 {{ rating.computed.complianceScore }} / 反馈 {{ rating.computed.feedbackScore }}
+          </p>
+          <div v-if="rating?.computed.signals.length" class="tags">
+            <span v-for="signal in rating.computed.signals" :key="signal" class="tag">{{ signal }}</span>
+          </div>
+          <p v-else class="muted">暂无足够行为数据。</p>
+        </div>
+        <div class="panel">
+          <h3>关系概览</h3>
+          <p class="muted">关注关系会参与关注时间线，关注作者事件会进入推荐画像的作者亲和度。</p>
+        </div>
       </aside>
     </div>
   </div>
@@ -84,6 +99,17 @@ type Summary = {
   followedByMe: boolean;
 };
 
+type Rating = {
+  computed: {
+    contentQualityScore: number;
+    complianceScore: number;
+    feedbackScore: number;
+    combinedScore: number;
+    level: "A" | "B" | "C" | "D";
+    signals: string[];
+  };
+};
+
 type ListType = "followers" | "following";
 
 const route = useRoute();
@@ -93,6 +119,7 @@ const { user, refreshMe } = useAuth();
 const { uploadAvatar } = useMediaUpload();
 const profile = ref<PublicUser | null>(null);
 const summary = ref<Summary | null>(null);
+const rating = ref<Rating | null>(null);
 const relationItems = ref<RelationItem[]>([]);
 const activeList = ref<ListType>("followers");
 const avatarInput = ref<HTMLInputElement | null>(null);
@@ -106,11 +133,11 @@ const bioLength = computed(() => Array.from(bioDraft.value).length);
 
 onMounted(async () => {
   await refreshMe();
-  await Promise.all([loadProfile(), loadSummary(), loadRelations()]);
+  await Promise.all([loadProfile(), loadSummary(), loadRelations(), loadRating()]);
 });
 
 watch(userId, async () => {
-  await Promise.all([loadProfile(), loadSummary(), loadRelations()]);
+  await Promise.all([loadProfile(), loadSummary(), loadRelations(), loadRating()]);
 });
 
 watch(
@@ -130,6 +157,11 @@ async function loadProfile() {
 async function loadSummary() {
   const payload = await blogApi<{ summary: Summary }>(`/users/${userId.value}/follow-summary`);
   summary.value = payload.summary;
+}
+
+async function loadRating() {
+  const payload = await userApi<{ rating: Rating }>(`/users/${userId.value}/rating`);
+  rating.value = payload.rating;
 }
 
 async function loadRelations() {

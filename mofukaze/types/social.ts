@@ -30,6 +30,12 @@ export type Article = {
   content: string;
   excerpt: string;
   tag: string;
+  status: "PENDING_REVIEW" | "PUBLISHED" | "LOW_PRIORITY" | "REVIEW_REQUIRED" | "REJECTED";
+  reviewDecision: string | null;
+  riskLevel: string | null;
+  reviewReason: string | null;
+  reviewSuggestion: string | null;
+  reviewedAt: string | null;
   posttime: string;
   author: PublicUser;
   aiAnalysis: AiAnalysis | null;
@@ -50,6 +56,13 @@ export type ArticleTagSummary = {
 
 export type CreateArticleResponse = {
   article: Article;
+  review: {
+    status: Article["status"];
+    decision?: string | null;
+    riskLevel?: string | null;
+    reason?: string | null;
+    suggestion?: string | null;
+  };
 };
 
 export type FeedResponse = {
@@ -103,7 +116,18 @@ export type UploadedMedia = {
 export type NotificationItem = {
   id: string;
   userId: number;
-  type: "CONTENT_PUBLISHED" | "COMMENT" | "REPLY" | "ARTICLE_REACTION" | "COMMENT_REACTION" | "FOLLOW";
+  type:
+    | "CONTENT_PUBLISHED"
+    | "CONTENT_REVIEW_APPROVED"
+    | "CONTENT_REVIEW_LIMITED"
+    | "CONTENT_REVIEW_REQUIRED"
+    | "CONTENT_REVIEW_REJECTED"
+    | "CONTENT_REVIEW_FAILED"
+    | "COMMENT"
+    | "REPLY"
+    | "ARTICLE_REACTION"
+    | "COMMENT_REACTION"
+    | "FOLLOW";
   title: string;
   body: string | null;
   actorId: number | null;

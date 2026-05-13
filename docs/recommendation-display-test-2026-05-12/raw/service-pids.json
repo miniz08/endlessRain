@@ -1,0 +1,50 @@
+﻿[
+    {
+        "name":  "user_service",
+        "pid":  8212,
+        "port":  3003,
+        "stdout":  "docs\\recommendation-display-test-2026-05-12\\raw\\user_service.stdout.log",
+        "stderr":  "docs\\recommendation-display-test-2026-05-12\\raw\\user_service.stderr.log",
+        "startedAt":  "2026-05-12T20:08:42.6500022+08:00"
+    },
+    {
+        "name":  "ai_service",
+        "pid":  19108,
+        "port":  3004,
+        "stdout":  "docs\\recommendation-display-test-2026-05-12\\raw\\ai_service.stdout.log",
+        "stderr":  "docs\\recommendation-display-test-2026-05-12\\raw\\ai_service.stderr.log",
+        "startedAt":  "2026-05-12T20:08:42.6675046+08:00"
+    },
+    {
+        "name":  "blog_service",
+        "pid":  12836,
+        "port":  3002,
+        "stdout":  "docs\\recommendation-display-test-2026-05-12\\raw\\blog_service.stdout.log",
+        "stderr":  "docs\\recommendation-display-test-2026-05-12\\raw\\blog_service.stderr.log",
+        "startedAt":  "2026-05-12T20:08:42.6732700+08:00"
+    },
+    {
+        "name":  "chat_service",
+        "pid":  15244,
+        "port":  3005,
+        "stdout":  "docs\\recommendation-display-test-2026-05-12\\raw\\chat_service.stdout.log",
+        "stderr":  "docs\\recommendation-display-test-2026-05-12\\raw\\chat_service.stderr.log",
+        "startedAt":  "2026-05-12T20:08:42.6782881+08:00"
+    },
+    {
+        "name":  "api_gateway",
+        "pid":  3392,
+        "port":  3001,
+        "stdout":  "docs\\recommendation-display-test-2026-05-12\\raw\\api_gateway.stdout.log",
+        "stderr":  "docs\\recommendation-display-test-2026-05-12\\raw\\api_gateway.stderr.log",
+        "startedAt":  "2026-05-12T20:08:42.6844769+08:00"
+    },
+    {
+        "name":  "frontend",
+        "pid":  15432,
+        "port":  3000,
+        "stdout":  "docs\\recommendation-display-test-2026-05-12\\raw\\frontend.stdout.log",
+        "stderr":  "docs\\recommendation-display-test-2026-05-12\\raw\\frontend.stderr.log",
+        "startedAt":  "2026-05-12T20:08:42.6906431+08:00"
+    }
+]

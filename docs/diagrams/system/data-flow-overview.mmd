@@ -1,0 +1,18 @@
+flowchart TD
+  A["用户身份数据<br/>user / auth_refresh_token"] --> B["内容生产<br/>article / comment"]
+  B --> C["AI 分析数据<br/>article_ai_analysis / article_ai_tag"]
+  C --> D["内容状态与展示控制<br/>status / riskLevel / reviewDecision"]
+  D --> E["首页、关注流、推荐流"]
+  E --> F["用户行为数据<br/>reco_event / reaction / follow"]
+  F --> G["消息反馈<br/>notification"]
+  F --> H["推荐画像<br/>reco_user_profile / reco_article_daily_stat"]
+  C --> I["用户综合评级<br/>professionalism / friendliness / rating"]
+  H --> E
+  I --> E
+  A --> J["聊天数据<br/>chat_thread / chat_message"]
+  B --> K["审计数据<br/>audit_log"]
+  C --> K
+  F --> K
+  J --> K
+  K --> L["运维监控<br/>/ops"]
+
