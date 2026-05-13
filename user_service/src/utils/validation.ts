@@ -68,10 +68,23 @@ export function assertUsername(value: unknown): string {
 
 export function assertPassword(value: unknown): string {
   const password = assertString(value, "password");
-  if (password.length < 8 || password.length > 128) {
-    throw new HttpError(400, "password must be 8-128 characters", "VALIDATION_ERROR");
+  if (password.length < 6 || password.length > 128) {
+    throw new HttpError(400, "password must be 6-128 characters", "VALIDATION_ERROR");
   }
   return password;
+}
+
+export function assertLoginPassword(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new HttpError(400, "password must be a string", "VALIDATION_ERROR");
+  }
+  if (!value) {
+    throw new HttpError(400, "password is required", "VALIDATION_ERROR");
+  }
+  if (value.length > 128) {
+    throw new HttpError(400, "password is too long", "VALIDATION_ERROR");
+  }
+  return value;
 }
 
 export function parsePositiveInt(value: unknown, field: string): number {

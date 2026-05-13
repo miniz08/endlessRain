@@ -47,8 +47,7 @@ watch(
 );
 
 onMounted(async () => {
-  if (!user.value) await refreshMe();
-  if (user.value) await loadUnreadNotifications();
+  await refreshMe();
 });
 
 async function loadUnreadNotifications() {

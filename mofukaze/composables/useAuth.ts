@@ -7,7 +7,7 @@ export function useAuth() {
 
   async function refreshMe() {
     try {
-      const payload = await userApi<{ user: PublicUser }>("/auth/me");
+      const payload = await userApi<{ user: PublicUser | null }>("/auth/session");
       user.value = payload.user;
     } catch {
       user.value = null;

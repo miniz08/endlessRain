@@ -25,6 +25,18 @@ export async function requireAuth(req: Request, _res: Response, next: NextFuncti
   }
 }
 
+export async function optionalAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
+  try {
+    const token = extractAccessToken(req);
+    if (token) {
+      req.auth = await getUserByAccessToken(token);
+    }
+  } catch {
+    req.auth = undefined;
+  }
+  next();
+}
+
 export function requireRole(...roles: string[]) {
   const allowed = new Set(roles.map((role) => role.toLowerCase()));
   return (req: Request, _res: Response, next: NextFunction): void => {

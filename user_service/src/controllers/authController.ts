@@ -18,6 +18,7 @@ import {
 } from "../utils/cookies.js";
 import {
   assertEmail,
+  assertLoginPassword,
   assertPassword,
   assertString,
   assertUsername,
@@ -47,7 +48,7 @@ export async function register(req: Request, res: Response): Promise<void> {
 
 export async function login(req: Request, res: Response): Promise<void> {
   const identifier = assertString(req.body?.identifier ?? req.body?.email ?? req.body?.username, "identifier");
-  const password = assertPassword(req.body?.password);
+  const password = assertLoginPassword(req.body?.password);
 
   const result = await loginUser(identifier, password, requestContext(req));
   req.auth = {
@@ -99,6 +100,15 @@ export async function logout(req: Request, res: Response): Promise<void> {
 
 export async function me(req: Request, res: Response): Promise<void> {
   const user = await getPublicUserById(req.auth!.id);
+  res.json({ user });
+}
+
+export async function session(req: Request, res: Response): Promise<void> {
+  if (!req.auth) {
+    res.json({ user: null });
+    return;
+  }
+  const user = await getPublicUserById(req.auth.id);
   res.json({ user });
 }
 
