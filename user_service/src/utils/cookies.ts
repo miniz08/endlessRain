@@ -5,12 +5,13 @@ export const ACCESS_COOKIE = "ls_access_token";
 export const REFRESH_COOKIE = "ls_refresh_token";
 export const CSRF_COOKIE = "ls_refresh_csrf";
 
-const isProduction = process.env.NODE_ENV === "production";
+const cookieSecure = parseBooleanEnv(process.env.COOKIE_SECURE, false);
+const cookieSameSite = parseSameSiteEnv(process.env.COOKIE_SAMESITE);
 
 const baseCookieOptions: SerializeOptions = {
   httpOnly: true,
-  sameSite: "lax",
-  secure: isProduction,
+  sameSite: cookieSameSite,
+  secure: cookieSecure,
   path: "/",
 };
 
@@ -45,8 +46,8 @@ export function setRefreshCookies(
     "Set-Cookie",
     serialize(CSRF_COOKIE, csrfToken, {
       httpOnly: false,
-      sameSite: "lax",
-      secure: isProduction,
+      sameSite: cookieSameSite,
+      secure: cookieSecure,
       path: "/",
       maxAge: maxAgeSeconds,
     }),
@@ -61,9 +62,23 @@ export function clearAuthCookies(res: Response): void {
         path: "/",
         maxAge: 0,
         httpOnly: name !== CSRF_COOKIE,
-        sameSite: "lax",
-        secure: isProduction,
+        sameSite: cookieSameSite,
+        secure: cookieSecure,
       }),
     );
   }
+}
+
+function parseBooleanEnv(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined) return fallback;
+  const normalized = value.trim().toLowerCase();
+  if (["1", "true", "yes", "on"].includes(normalized)) return true;
+  if (["0", "false", "no", "off"].includes(normalized)) return false;
+  return fallback;
+}
+
+function parseSameSiteEnv(value: string | undefined): SerializeOptions["sameSite"] {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "strict" || normalized === "none") return normalized;
+  return "lax";
 }

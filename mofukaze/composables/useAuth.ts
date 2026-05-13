@@ -21,9 +21,15 @@ export function useAuth() {
       method: "POST",
       body: { identifier, password },
     });
-    user.value = payload.user;
+    const sessionPayload = await userApi<{ user: PublicUser | null }>("/auth/session");
+    if (!sessionPayload.user || sessionPayload.user.id !== payload.user.id) {
+      user.value = null;
+      ready.value = true;
+      throw new Error("登录成功，但浏览器没有保存登录状态。请检查 Cookie/Secure/HTTPS 配置。");
+    }
+    user.value = sessionPayload.user;
     ready.value = true;
-    return payload.user;
+    return sessionPayload.user;
   }
 
   async function register(input: { username: string; email: string; password: string }) {
