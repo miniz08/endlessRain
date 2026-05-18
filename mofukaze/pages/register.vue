@@ -2,7 +2,6 @@
   <div class="page auth-page">
     <section class="panel auth-panel wide">
       <h2>注册</h2>
-      <p class="muted">创建一个普通用户账号，注册成功后会自动登录。</p>
 
       <form class="form" @submit.prevent="submit">
         <label>

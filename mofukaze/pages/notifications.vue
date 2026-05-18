@@ -2,7 +2,6 @@
   <div class="page">
     <div v-if="!user" class="panel">
       <h2>通知中心</h2>
-      <p class="muted">登录后可以查看发布、评论、reaction 和关注提醒。</p>
       <NuxtLink to="/login">
         <button class="primary">登录</button>
       </NuxtLink>
@@ -13,7 +12,6 @@
         <div class="panel notification-head">
           <div>
             <h2>通知中心</h2>
-            <p class="muted">聚合内容发布、互动提醒和关系变化。</p>
           </div>
           <div class="row">
             <span class="status-pill" :class="unreadCount > 0 ? 'risk-mid' : 'risk-low'">
@@ -73,10 +71,6 @@
               {{ filter.label }}
             </button>
           </div>
-        </div>
-        <div class="panel">
-          <h3>闭环说明</h3>
-          <p class="muted">通知中心会反馈内容审核结果、互动提醒和关系变化，帮助用户了解内容处理状态。</p>
         </div>
       </aside>
     </div>

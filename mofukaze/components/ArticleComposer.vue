@@ -4,7 +4,6 @@
       <div class="composer-head">
         <div>
           <h3>发布动态</h3>
-          <p class="muted">使用富文本、LaTeX 公式、图片和标签来组织你的内容。</p>
         </div>
         <span class="status-pill risk-low">{{ user.username }}</span>
       </div>
@@ -30,7 +29,6 @@
     <div v-else class="composer-login">
       <div>
         <h3>发布动态</h3>
-        <p class="muted">登录后可以发布内容、参与评论和 reaction。</p>
       </div>
       <NuxtLink to="/login">
         <button class="primary">登录</button>
@@ -151,6 +149,6 @@ function reviewClass(status: CreateArticleResponse["review"]["status"]) {
 }
 
 function reviewBody(payload: CreateArticleResponse) {
-  return payload.review.reason || payload.review.suggestion || payload.article.reviewReason || "处理结果已同步到通知中心。";
+  return payload.review.reason || payload.review.suggestion || payload.article.reviewReason || "处理结果已同步到通知中心";
 }
 </script>

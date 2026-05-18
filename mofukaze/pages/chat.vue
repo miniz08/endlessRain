@@ -2,7 +2,6 @@
   <div class="page">
     <div v-if="!user" class="panel">
       <h2>私信</h2>
-      <p class="muted">登录后可以使用单对单聊天。</p>
       <NuxtLink to="/login">
         <button class="primary">登录</button>
       </NuxtLink>

@@ -2,7 +2,7 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="topbar-inner">
-        <NuxtLink class="brand" to="/">LongSeason 社交平台</NuxtLink>
+        <NuxtLink class="brand" to="/">LongSeason</NuxtLink>
         <form class="topbar-search" role="search" @submit.prevent="submitSiteSearch">
           <input v-model.trim="siteSearch" type="search" placeholder="搜索博客 / 用户" autocomplete="off" />
           <button class="primary" :disabled="siteSearch.length === 0">搜索</button>

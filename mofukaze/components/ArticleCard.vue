@@ -53,9 +53,6 @@
       </button>
       <span class="muted">共 {{ localReactions.total }}</span>
     </div>
-    <p v-else class="muted" style="margin-top: 10px">
-      内容暂未公开，评论和 reaction 已暂停。
-    </p>
   </article>
 </template>
 

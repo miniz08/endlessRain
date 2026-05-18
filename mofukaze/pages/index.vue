@@ -25,7 +25,6 @@
           <div class="content-profile-head">
             <div>
               <h3>个人画像</h3>
-              <p class="muted">推荐页会根据阅读、互动、关注和停留行为更新兴趣分布。</p>
             </div>
             <span class="status-pill" :class="profileReady ? 'risk-low' : 'risk-mid'">
               {{ profileReady ? "已生成" : "待学习" }}
@@ -33,10 +32,7 @@
           </div>
 
           <div v-if="!user" class="profile-empty">
-            <p class="muted">登录后可以看到你的兴趣画像，并获得更贴近个人偏好的推荐。</p>
-            <NuxtLink to="/login">
-              <button class="primary">去登录</button>
-            </NuxtLink>
+            暂无画像
           </div>
 
           <div v-else-if="profileLoading" class="panel empty profile-loading">画像加载中</div>
@@ -54,7 +50,7 @@
               </div>
             </div>
             <div v-else class="profile-empty">
-              <p class="muted">还没有足够的行为数据。多浏览、评论、reaction 或关注作者后，画像会逐渐清晰。</p>
+              暂无行为数据
             </div>
 
             <div v-if="topTags.length > 0" class="profile-bars">
@@ -78,22 +74,6 @@
               </button>
             </div>
           </div>
-        </div>
-
-        <div class="panel">
-          <h3>{{ user ? user.username : "未登录" }}</h3>
-          <p class="muted">关注流、评论和 reaction 会参与推荐学习，也会让系统更理解你的内容偏好。</p>
-          <div v-if="!user" class="row">
-            <NuxtLink to="/login">
-              <button class="primary">去登录</button>
-            </NuxtLink>
-            <NuxtLink to="/register">
-              <button>注册</button>
-            </NuxtLink>
-          </div>
-          <NuxtLink v-else :to="`/u/${user.id}`">
-            <button>查看主页</button>
-          </NuxtLink>
         </div>
       </aside>
     </div>

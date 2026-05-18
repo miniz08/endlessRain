@@ -4,7 +4,6 @@
       <div class="search-head">
         <div>
           <h2>搜索</h2>
-          <p class="muted">按关键词查找博客内容、主题标签或用户。</p>
         </div>
         <form class="inline-form search-inline" @submit.prevent="submitSearch">
           <input v-model.trim="draft" type="search" placeholder="输入关键词" autocomplete="off" />

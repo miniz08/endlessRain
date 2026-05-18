@@ -25,7 +25,7 @@ export function useAuth() {
     if (!sessionPayload.user || sessionPayload.user.id !== payload.user.id) {
       user.value = null;
       ready.value = true;
-      throw new Error("登录成功，但浏览器没有保存登录状态。请检查 Cookie/Secure/HTTPS 配置。");
+      throw new Error("登录成功，但浏览器没有保存登录状态，请检查 Cookie/Secure/HTTPS 配置");
     }
     user.value = sessionPayload.user;
     ready.value = true;

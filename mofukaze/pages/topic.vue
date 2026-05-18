@@ -3,7 +3,6 @@
     <section class="panel topic-hero">
       <div>
         <h2>标签分类</h2>
-        <p class="muted">从人工标签、AI 标签和主标签聚合内容，按主题浏览信息流。</p>
       </div>
       <button class="ghost" :disabled="loadingTags" @click="loadTags">
         {{ loadingTags ? "同步中" : "刷新标签" }}
@@ -37,8 +36,8 @@
         <div class="panel topic-toolbar">
           <div>
             <h3>{{ selectedTag || "选择一个标签" }}</h3>
-            <p class="muted" style="margin: 4px 0 0">
-              {{ selectedSummary ? summaryText(selectedSummary) : "点击左侧标签查看关联文章。" }}
+            <p v-if="selectedSummary" class="muted" style="margin: 4px 0 0">
+              {{ summaryText(selectedSummary) }}
             </p>
           </div>
           <button v-if="selectedTag" class="ghost" :disabled="loadingArticles" @click="refreshArticles">

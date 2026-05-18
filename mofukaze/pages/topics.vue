@@ -3,7 +3,6 @@
     <section class="topic-bubble-hero">
       <div>
         <h2>主题分类</h2>
-        <p class="muted">按照内容主题浏览信息流，气泡越大表示相关内容越多。</p>
       </div>
       <button class="ghost" :disabled="loading" @click="loadTags">
         {{ loading ? "同步中" : "刷新主题" }}

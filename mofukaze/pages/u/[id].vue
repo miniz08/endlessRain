@@ -20,7 +20,7 @@
             </div>
           </div>
           <p v-if="profile.bio" class="profile-bio">{{ profile.bio }}</p>
-          <p v-else class="profile-bio muted">这个人还没有填写个人简介。</p>
+          <p v-else class="profile-bio muted">暂无个人简介</p>
           <div v-if="isOwnProfile" class="profile-editor">
             <textarea v-model="bioDraft" maxlength="280" placeholder="介绍一下自己" />
             <div class="composer-actions">
@@ -97,11 +97,7 @@
           <div v-if="rating?.computed.signals.length" class="tags">
             <span v-for="signal in rating.computed.signals" :key="signal" class="tag">{{ signal }}</span>
           </div>
-          <p v-else class="muted">暂无足够行为数据。</p>
-        </div>
-        <div class="panel">
-          <h3>关系概览</h3>
-          <p class="muted">关注关系会参与关注时间线，关注作者事件会进入推荐画像的作者亲和度。</p>
+          <p v-else class="muted">暂无足够行为数据</p>
         </div>
       </aside>
     </div>

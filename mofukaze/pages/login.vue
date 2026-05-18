@@ -2,7 +2,6 @@
   <div class="page auth-page">
     <section class="panel auth-panel">
       <h2>登录</h2>
-      <p class="muted">使用用户名或邮箱进入你的账号。</p>
       <form class="form" @submit.prevent="submit">
         <label>
           <span class="muted">用户名或邮箱</span>

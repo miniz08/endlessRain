@@ -15,8 +15,8 @@
               <textarea v-model="commentText" placeholder="写下你的评论" />
               <button class="primary" :disabled="submitting">{{ submitting ? "发送中" : "发布评论" }}</button>
             </form>
-            <p v-else-if="!isPublicArticle" class="muted">内容暂未公开，评论已暂停。</p>
-            <p v-else class="muted">登录后可以评论。</p>
+            <p v-else-if="!isPublicArticle" class="muted">评论暂停</p>
+            <p v-else class="muted">登录后可评论</p>
 
             <div v-if="comments.length === 0" class="empty">暂无评论</div>
             <div v-for="comment in comments" :key="comment.id" class="panel" style="margin-top: 10px">
