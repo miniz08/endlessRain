@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireReviewerOrInternal } from "../../middlewares/auth.js";
+import { requireAdminOrInternal } from "../../middlewares/auth.js";
 import {
   analyzeArticleController,
   analyzeTextController,
@@ -9,7 +9,7 @@ import {
 
 export const analysisRouter = Router();
 
-analysisRouter.use(requireReviewerOrInternal);
+analysisRouter.use(requireAdminOrInternal);
 analysisRouter.get("/taxonomy", getTaxonomyController);
 analysisRouter.post("/text", analyzeTextController);
 analysisRouter.post("/articles/:articleId", analyzeArticleController);

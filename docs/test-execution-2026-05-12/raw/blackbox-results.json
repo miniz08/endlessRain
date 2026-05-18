@@ -864,7 +864,7 @@
     "pass": true,
     "durationMs": 259.54,
     "requestId": "bb-mp2d9cgqbf8f34-b8611c74-4991-4cc9-b7da-714db3c24721",
-    "note": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"Analysis APIs are restricted to reviewers or internal services\",\"requestId\":\"bb-mp2d9cgqbf8f34-b8611c74-4991-4cc9-b7da-714db3c24721\"}}",
+    "note": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"Analysis APIs are restricted to admins or internal services\",\"requestId\":\"bb-mp2d9cgqbf8f34-b8611c74-4991-4cc9-b7da-714db3c24721\"}}",
     "startedAt": "2026-05-12T08:27:07.444Z"
   },
   {
@@ -1032,7 +1032,7 @@
     "pass": true,
     "durationMs": 4.63,
     "requestId": "bb-mp2d9cgqbf8f34-2d5aa52e-e837-459a-a919-ebc5ab420b05",
-    "note": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"Reviewer or admin role required\"}}",
+    "note": "{\"error\":{\"code\":\"FORBIDDEN\",\"message\":\"Admin role required\"}}",
     "startedAt": "2026-05-12T08:27:18.650Z"
   },
   {

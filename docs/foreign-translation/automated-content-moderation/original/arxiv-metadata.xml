@@ -1,0 +1,32 @@
+﻿<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/XEBqH26OFycsZqW489Wt7nmIkgA</id>
+  <title>arXiv Query: search_query=&amp;id_list=2210.10454&amp;start=0&amp;max_results=10</title>
+  <updated>2026-05-13T12:36:23Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=&amp;start=0&amp;max_results=10&amp;id_list=2210.10454" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>10</opensearch:itemsPerPage>
+  <opensearch:totalResults>1</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2210.10454v3</id>
+    <title>Automated Content Moderation Increases Adherence to Community Guidelines</title>
+    <updated>2023-02-16T05:32:31Z</updated>
+    <link href="https://arxiv.org/abs/2210.10454v3" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2210.10454v3" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Online social media platforms use automated moderation systems to remove or reduce the visibility of rule-breaking content. While previous work has documented the importance of manual content moderation, the effects of automated content moderation remain largely unknown. Here, in a large study of Facebook comments (n=412M), we used a fuzzy regression discontinuity design to measure the impact of automated content moderation on subsequent rule-breaking behavior (number of comments hidden/deleted) and engagement (number of additional comments posted). We found that comment deletion decreased subsequent rule-breaking behavior in shorter threads (20 or fewer comments), even among other participants, suggesting that the intervention prevented conversations from derailing. Further, the effect of deletion on the affected user's subsequent rule-breaking behavior was longer-lived than its effect on reducing commenting in general, suggesting that users were deterred from rule-breaking but not from commenting. In contrast, hiding (rather than deleting) content had small and statistically insignificant effects. Our results suggest that automated content moderation increases adherence to community guidelines.</summary>
+    <category term="cs.CY" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2022-10-19T10:41:03Z</published>
+    <arxiv:comment>Accepted at TheWebConf 2023, please cite accordingly</arxiv:comment>
+    <arxiv:primary_category term="cs.CY"/>
+    <author>
+      <name>Manoel Horta Ribeiro</name>
+    </author>
+    <author>
+      <name>Justin Cheng</name>
+    </author>
+    <author>
+      <name>Robert West</name>
+    </author>
+  </entry>
+</feed>
+

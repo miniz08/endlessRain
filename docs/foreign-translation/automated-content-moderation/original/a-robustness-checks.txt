@@ -1,0 +1,164 @@
+A ROBUSTNESS CHECKS
+Visual analysis. As a first sanity check, we visually inspect dis-
+continuities in the outcome variables around the thresholds (e.g.,
+as shown in Fig. 5). We find that we can visualize the discontinu-
+ities right around the threshold, as expected in a fuzzy regression
+discontinuity design. In Fig. 7, we further show the discontinuities
+for the thread-level scenario (setup: ≤20/All).
+Manipulation at the cutpoint. One well-established threat to
+the validity of RD designs is that individuals may have knowledge
+
+Horta Ribeiro et al.
+14
+16
+18
+Y: Comments
+E[X|S]
+Thread level: 20/All
+-5% -2.5% tdelete +2.5% +5%
+Score S
+0.5
+0.6
+0.7
+Y: Interventions
+E[X|S]
+Figure 7: Example of the discontinuities in the outcome (top:
+comments; bottom: interventions) we visually inspected to
+ensure the validity of our approach.
+-5% -2.5% thide +2.5% +5%
+0.02
+0.04
+0.06
+Density
+Check for manipulation at the "hide" cutpoint
+-5% -2.5% tdelete +2.5% +5%
+0.02
+0.04
+0.06
+Density
+Check for manipulation at the "delete" cutpoint
+Figure 8: Density of the running variable (i.e., the score 𝑆)
+around the thresholds where content gets deleted ( 𝑡delete)
+and hidden (𝑡hide).
+about the cutpoint and adjust the running variable (for us, the score
+𝑆) to fall right before or right above it. For instance, in our scenario,
+if users knew exactly what score their comment would receive
+before posting it, they might re-word until they find it below the
+threshold. While in our case, we do not consider this threat to be
+credible, we entertain the hypothesis and conduct the standard
+robustness checks, inspecting the density of scores around the
+threshold and conducting the McCrary test [33] to assess whether
+the discontinuity in the density of the rating variable at the cutpoint
+equals zero. We plot the density in Fig. 8, which shows no indication
+of manipulation around the threshold (as does the McCrary test,
+where 𝑝 > 0.05).
+Placebo FRDs. A key assumption of FRD is that around the thresh-
+old, units are exactly the same except for the fact that those above
+the threshold have an increased chance of receiving the treatment.
+As such, it is commonplace (e.g., see [23]) to repeat the entire FRD
+analysis considering a variable that the treatment should not im-
+pact. If comments below and above the threshold are comparable,
+we should not see significant differences for these placebo FRDs.
+In our case, we run placebo FRDs considering the same outcome
+variables calculated in the pre-assignment period (see Fig. 3), where
+no intervention occurred. Thus, we should expect no discontinuity
+1%
+ b * +1%
+0.1
+0.0
+0.1
+Standardized effect
+Y: Interventions 
+ Scenario: Thread-level 
+ Setup: 20/All
+1%
+ b * +1%
+Y: Interventions 
+ Scenario: Thread-level 
+ Setup: 20/All
+1%
+ b * +1%
+Kernel bandwidth
+0.1
+0.0
+0.1
+Standardized effect
+Y: Interventions 
+ Scenario: Thread-level 
+ Setup: 20/All
+1%
+ b * +1%
+Kernel bandwidth
+Y: Interventions 
+ Scenario: Thread-level 
+ Setup: 20/All
+Figure 9: We show how the standardized effect ( 𝑦-axis) of
+four of the regression discontinuity designs vary with slight
+changes to the kernel bandwidth. 𝑏∗ corresponds to the MSE-
+optimal bandwidth for each FRD (as described in [21]).
+in the outcomes. Results are reported in Table 3. We find that effects
+in the placebo FRDs are small and not statistically significant, i.e.,
+𝑝 > 0.05, suggesting that, indeed, comments below and above the
+threshold are comparable.
+Varying the bandwidth. Finally, to ensure our findings were ro-
+bust to slight changes in the kernel bandwidth, we repeated the
+FRDs with varying bandwidth sizes. In Fig. 9 we show the changes
+in the standardized effect for four of the FRDs carried (at both the
+user level and the thread level) when varying the kernel bandwidth
+around the MSE-optimal bandwidth 𝑏∗. Overall, we find that our
+results are robust to slight changes in the kernel bandwidth.
+
+Automated Content Moderation Increases Adherence to Community Guidelines
+Table 3: Results for placebo FRDs. This table is exactly the same as Table 2 except that outcomes are calculated in the pre-
+assignment period and thus should not differ between treatment and control groups (i.e., those whose comment fell above or
+below the intervention thresholds).
+Effect Effect (Standardized) n
+Intervention Scenario Outcome Setup
+Delete Thread-level Comments ≤20 / All -0.125 (-0.319, 0.068) -0.024 (-0.062, 0.013) 190885
+≤20 / Other -0.153 (-0.336, 0.031) -0.030 (-0.065, 0.006) 200655
+>20 / All -11.87 (-41.36, 17.62) -0.022 (-0.076, 0.033) 49645
+>20 / Other -20.34 (-49.02, 8.33) -0.046 (-0.111, 0.019) 52241
+Interventions ≤20 / All 0.003 (-0.011, 0.016) 0.006 (-0.022, 0.034) 190885
+≤20 / Other 0.001 (-0.013, 0.015) 0.002 (-0.028, 0.032) 200655
+>20 / All 0.038 (-0.429, 0.505) 0.005 (-0.061, 0.072) 49645
+>20 / Other -0.005 (-0.450, 0.441) -0.001 (-0.067, 0.065) 52241
+User-level (first offender) Comments 7 -0.186 (-1.77, 1.39) -0.004 (-0.038, 0.030) 162149
+14 -0.545 (-3.38, 2.29) -0.007 (-0.045, 0.031) 112793
+21 0.569 (-4.11, 5.25) 0.006 (-0.042, 0.054) 84592
+28 3.68 (-2.35, 9.71) 0.029 (-0.019, 0.078) 60175
+Interventions 7 0.013 (-0.008, 0.035) 0.019 (-0.012, 0.050) 162149
+14 0.001 (-0.029, 0.031) 0.001 (-0.036, 0.039) 112793
+21 -0.012 (-0.052, 0.029) -0.013 (-0.057, 0.031) 84592
+28 -0.008 (-0.065, 0.049) -0.008 (-0.063, 0.048) 60175
+User-level (repeat offender) Comments 7 -0.369 (-5.73, 4.99) -0.007 (-0.108, 0.094) 29825
+14 -0.906 (-7.57, 5.76) -0.010 (-0.081, 0.061) 26596
+21 1.94 (-12.45, 16.33) 0.015 (-0.095, 0.124) 21693
+28 2.01 (-15.87, 19.90) 0.012 (-0.097, 0.121) 18468
+Interventions 7 0.048 (-0.022, 0.118) 0.057 (-0.026, 0.139) 29825
+14 0.036 (-0.069, 0.141) 0.031 (-0.061, 0.124) 26596
+21 0.086 (-0.047, 0.219) 0.062 (-0.034, 0.159) 21693
+28 0.021 (-0.128, 0.170) 0.013 (-0.081, 0.108) 18468
+Hide Thread-level Comments ≤20 / All -0.054 (-0.150, 0.042) -0.010 (-0.029, 0.008) 868632
+≤20 / Other -0.039 (-0.140, 0.062) -0.007 (-0.027, 0.012) 907871
+>20 / All -18.16 (-40.09, 3.77) -0.018 (-0.041, 0.004) 300716
+>20 / Other -17.14 (-38.37, 4.08) -0.017 (-0.037, 0.004) 314287
+Interventions ≤20 / All 0.001 (-0.005, 0.006) 0.002 (-0.014, 0.019) 868632
+≤20 / Other 0.001 (-0.005, 0.006) 0.002 (-0.014, 0.018) 907871
+>20 / All -0.021 (-0.146, 0.104) -0.005 (-0.033, 0.023) 300716
+>20 / Other -0.063 (-0.163, 0.038) -0.014 (-0.036, 0.008) 314287
+User-level (first offender) Comments 7 -0.501 (-1.28, 0.279) -0.009 (-0.023, 0.005) 723278
+14 -0.972 (-2.37, 0.422) -0.011 (-0.027, 0.005) 542780
+21 -0.877 (-3.07, 1.32) -0.008 (-0.026, 0.011) 422996
+28 1.30 (-2.53, 5.14) 0.008 (-0.016, 0.033) 291712
+Interventions 7 0.003 (-0.008, 0.015) 0.006 (-0.014, 0.025) 723278
+14 -0.009 (-0.025, 0.008) -0.013 (-0.037, 0.011) 542780
+21 -0.011 (-0.033, 0.010) -0.014 (-0.042, 0.013) 422996
+28 -0.003 (-0.024, 0.018) -0.003 (-0.026, 0.020) 291712
+User-level (repeat offender) Comments 7 0.231 (-2.11, 2.58) 0.004 (-0.033, 0.040) 126587
+14 0.766 (-3.10, 4.63) 0.007 (-0.028, 0.042) 122545
+21 0.214 (-5.26, 5.69) 0.001 (-0.034, 0.037) 103467
+28 3.83 (-3.82, 11.49) 0.020 (-0.020, 0.060) 82067
+Interventions 7 0.003 (-0.021, 0.026) 0.004 (-0.028, 0.036) 126587
+14 0.002 (-0.035, 0.038) 0.002 (-0.035, 0.038) 122545
+21 0.029 (-0.038, 0.096) 0.024 (-0.032, 0.079) 103467
+28 0.009 (-0.047, 0.065) 0.007 (-0.034, 0.047) 82067

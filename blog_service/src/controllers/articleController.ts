@@ -29,6 +29,7 @@ export async function listArticlesController(req: Request, res: Response): Promi
     viewerRole: req.auth?.role,
     authorId: optionalPositiveInt(req.query.authorId, "authorId"),
     tag: optionalString(req.query.tag, "tag"),
+    keyword: optionalString(req.query.q ?? req.query.keyword, "q", 80),
     ...pagination,
   });
   res.json(payload);

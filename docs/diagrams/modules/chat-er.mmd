@@ -1,0 +1,8 @@
+flowchart LR
+  USER["用户"]
+  CHAT_THREAD["聊天线程"]
+  CHAT_MESSAGE["聊天消息"]
+
+  USER -->|"参与"| CHAT_THREAD
+  CHAT_THREAD -->|"包含"| CHAT_MESSAGE
+  USER -->|"发送"| CHAT_MESSAGE

@@ -20,7 +20,7 @@
         </button>
       </section>
 
-      <aside class="stack">
+      <aside class="stack home-sidebar">
         <div class="panel profile-visual-panel">
           <div class="content-profile-head">
             <div>

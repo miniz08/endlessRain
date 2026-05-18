@@ -1,0 +1,58 @@
+flowchart LR
+  USER["用户"]
+  AUTH["认证会话"]
+  ARTICLE["文章"]
+  COMMENT["评论"]
+  FOLLOW["关注关系"]
+  ARTICLE_REACTION["文章 Emoji"]
+  COMMENT_REACTION["评论 Emoji"]
+  NOTIFICATION["通知"]
+  ARTICLE_TAG["用户标签"]
+  ARTICLE_TAG_REL["文章-用户标签"]
+  AI_ANALYSIS["AI 分析结果"]
+  AI_TAG["AI 分析标签"]
+  AI_TAG_REL["文章-AI 标签"]
+  RECO_PROFILE["用户画像"]
+  RECO_EVENT["推荐事件"]
+  RECO_REQUEST["推荐请求"]
+  RECO_SEEN["已看记录"]
+  RECO_STAT["文章日统计"]
+  CHAT_THREAD["聊天线程"]
+  CHAT_MESSAGE["聊天消息"]
+  AUDIT["审计日志"]
+
+  USER -->|"认证"| AUTH
+  USER -->|"发布"| ARTICLE
+  USER -->|"发表"| COMMENT
+  ARTICLE -->|"承载"| COMMENT
+  COMMENT -->|"回复"| COMMENT
+
+  USER -->|"关注/被关注"| FOLLOW
+  USER -->|"添加"| ARTICLE_REACTION
+  ARTICLE -->|"获得"| ARTICLE_REACTION
+  USER -->|"添加"| COMMENT_REACTION
+  COMMENT -->|"获得"| COMMENT_REACTION
+
+  USER -->|"接收/触发"| NOTIFICATION
+  ARTICLE -->|"关联"| NOTIFICATION
+  COMMENT -->|"关联"| NOTIFICATION
+
+  ARTICLE -->|"关联"| ARTICLE_TAG_REL
+  ARTICLE_TAG -->|"映射"| ARTICLE_TAG_REL
+  ARTICLE -->|"当前分析"| AI_ANALYSIS
+  ARTICLE -->|"关联"| AI_TAG_REL
+  AI_TAG -->|"映射"| AI_TAG_REL
+
+  USER -->|"生成"| RECO_PROFILE
+  USER -->|"产生"| RECO_EVENT
+  ARTICLE -->|"被互动"| RECO_EVENT
+  RECO_REQUEST -->|"包含"| RECO_EVENT
+  USER -->|"记录"| RECO_SEEN
+  ARTICLE -->|"记录"| RECO_SEEN
+  ARTICLE -->|"汇总"| RECO_STAT
+
+  USER -->|"参与"| CHAT_THREAD
+  CHAT_THREAD -->|"包含"| CHAT_MESSAGE
+  USER -->|"发送"| CHAT_MESSAGE
+
+  USER -->|"操作"| AUDIT

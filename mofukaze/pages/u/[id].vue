@@ -37,16 +37,39 @@
           </div>
         </div>
 
-        <div class="panel">
-          <div class="tabs">
-            <button :class="{ active: activeList === 'followers' }" @click="switchList('followers')">
-              粉丝 {{ summary?.followerCount ?? 0 }}
-            </button>
-            <button :class="{ active: activeList === 'following' }" @click="switchList('following')">
-              关注 {{ summary?.followingCount ?? 0 }}
+        <div class="profile-main-section">
+          <div class="panel profile-tabs-panel">
+            <div class="tabs">
+              <button :class="{ active: activeSection === 'articles' }" @click="switchSection('articles')">
+                发布 {{ articleCountLabel }}
+              </button>
+              <button :class="{ active: activeSection === 'followers' }" @click="switchSection('followers')">
+                粉丝 {{ summary?.followerCount ?? 0 }}
+              </button>
+              <button :class="{ active: activeSection === 'following' }" @click="switchSection('following')">
+                关注 {{ summary?.followingCount ?? 0 }}
+              </button>
+            </div>
+          </div>
+
+          <div v-if="activeSection === 'articles'" class="profile-article-list">
+            <div v-if="articlesLoading" class="empty">发布记录加载中</div>
+            <div v-else-if="articlesError" class="error">{{ articlesError }}</div>
+            <div v-else-if="articleItems.length === 0" class="empty">暂无公开发布</div>
+            <template v-else>
+              <ArticleCard
+                v-for="article in articleItems"
+                :key="article.id"
+                :article="article"
+                compact
+              />
+            </template>
+            <button v-if="articlesNextCursor" class="primary" :disabled="articlesLoadingMore" @click="loadMoreArticles">
+              {{ articlesLoadingMore ? "加载中" : "查看更多发布" }}
             </button>
           </div>
-          <div class="user-list">
+
+          <div v-else class="panel user-list">
             <div v-for="item in relationItems" :key="item.user.id" class="user-item">
               <NuxtLink class="row" :to="`/u/${item.user.id}`">
                 <span class="avatar">
@@ -86,7 +109,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PublicUser } from "~/types/social";
+import type { Article, PublicUser } from "~/types/social";
 
 type RelationItem = {
   user: PublicUser & { followedByMe: boolean };
@@ -106,11 +129,12 @@ type Rating = {
     feedbackScore: number;
     combinedScore: number;
     level: "A" | "B" | "C" | "D";
+    articleCount: number;
     signals: string[];
   };
 };
 
-type ListType = "followers" | "following";
+type SectionType = "articles" | "followers" | "following";
 
 const route = useRoute();
 const userId = computed(() => Number(route.params.id));
@@ -121,23 +145,31 @@ const profile = ref<PublicUser | null>(null);
 const summary = ref<Summary | null>(null);
 const rating = ref<Rating | null>(null);
 const relationItems = ref<RelationItem[]>([]);
-const activeList = ref<ListType>("followers");
+const articleItems = ref<Article[]>([]);
+const articlesNextCursor = ref<number | null>(null);
+const activeSection = ref<SectionType>("articles");
 const avatarInput = ref<HTMLInputElement | null>(null);
 const bioDraft = ref("");
 const savingBio = ref(false);
 const avatarUploading = ref(false);
+const articlesLoading = ref(false);
+const articlesLoadingMore = ref(false);
+const articlesError = ref("");
 const profileError = ref("");
 const isOwnProfile = computed(() => Boolean(profile.value && user.value?.id === profile.value.id));
 const canChat = computed(() => Boolean(profile.value && (!user.value || user.value.id !== profile.value.id)));
 const bioLength = computed(() => Array.from(bioDraft.value).length);
+const articleCountLabel = computed(() => rating.value?.computed.articleCount ?? articleItems.value.length);
 
 onMounted(async () => {
   await refreshMe();
-  await Promise.all([loadProfile(), loadSummary(), loadRelations(), loadRating()]);
+  await Promise.all([loadProfile(), loadSummary(), loadArticles(), loadRating()]);
 });
 
 watch(userId, async () => {
-  await Promise.all([loadProfile(), loadSummary(), loadRelations(), loadRating()]);
+  activeSection.value = "articles";
+  relationItems.value = [];
+  await Promise.all([loadProfile(), loadSummary(), loadArticles(), loadRating()]);
 });
 
 watch(
@@ -165,13 +197,40 @@ async function loadRating() {
 }
 
 async function loadRelations() {
-  const path = activeList.value === "followers" ? "/followers" : "/following";
+  if (activeSection.value === "articles") return;
+  const path = activeSection.value === "followers" ? "/followers" : "/following";
   const payload = await blogApi<{ items: RelationItem[] }>(`${path}?userId=${userId.value}&limit=50`);
   relationItems.value = payload.items;
 }
 
-async function switchList(type: ListType) {
-  activeList.value = type;
+async function loadArticles(cursor?: number) {
+  const loadingRef = cursor ? articlesLoadingMore : articlesLoading;
+  loadingRef.value = true;
+  articlesError.value = "";
+  try {
+    const query = new URLSearchParams({ authorId: String(userId.value), limit: "8" });
+    if (cursor) query.set("cursor", String(cursor));
+    const payload = await blogApi<{ items: Article[]; nextCursor: number | null }>(`/articles?${query.toString()}`);
+    articleItems.value = cursor ? [...articleItems.value, ...payload.items] : payload.items;
+    articlesNextCursor.value = payload.nextCursor;
+  } catch (err) {
+    articlesError.value = err instanceof Error ? err.message : "发布记录加载失败";
+  } finally {
+    loadingRef.value = false;
+  }
+}
+
+async function loadMoreArticles() {
+  if (!articlesNextCursor.value) return;
+  await loadArticles(articlesNextCursor.value);
+}
+
+async function switchSection(type: SectionType) {
+  activeSection.value = type;
+  if (type === "articles") {
+    if (articleItems.value.length === 0) await loadArticles();
+    return;
+  }
   await loadRelations();
 }
 

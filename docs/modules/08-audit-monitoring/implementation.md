@@ -36,7 +36,7 @@ WebSocket 升级由 `handleProxyUpgrade` 单独处理。测试修复后，只有
 
 审计日志由各服务在关键动作中主动写入。不同服务的 `writeAuditLog` 结构相近，都会保存 requestId、用户信息、IP、请求方法、路由、动作、结果、状态码和详情。审计写入失败只打印错误，不阻断主业务流程，避免日志系统异常影响正常使用。
 
-审计查询和管理员摘要在 `gatewayStatus.ts` 中实现。`auditLogsController` 和 `adminSummaryController` 都会先解析 access token，并只允许 `reviewer` 或 `admin` 角色访问。摘要接口会统计指定时间窗口内的审计事件数、失败率、热点动作、热点路由和最近失败请求，便于测试报告和运维页面展示。
+审计查询和管理员摘要在 `gatewayStatus.ts` 中实现。`auditLogsController` 和 `adminSummaryController` 都会先解析 access token，并只允许 `admin` 角色访问。摘要接口会统计指定时间窗口内的审计事件数、失败率、热点动作、热点路由和最近失败请求，便于测试报告和运维页面展示。
 
 ## 主要接口
 
@@ -58,6 +58,6 @@ WebSocket 升级由 `handleProxyUpgrade` 单独处理。测试修复后，只有
 - 每个请求会生成或透传 `requestId`。
 - 各服务会在关键成功/失败动作中写入审计日志。
 - 网关统计路由请求数、错误数、方法分布和最后响应状态。
-- 管理员或审核员可以查看审计日志和运行摘要。
+- 管理员可以查看审计日志和运行摘要。
 - 健康检查能够检测上游服务可用性。
 - WebSocket 代理只对 chat 路由开启，降低升级连接误路由风险。

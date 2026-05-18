@@ -1,14 +1,14 @@
 flowchart TD
-  A["请求进入 api_gateway"] --> B["生成或透传 requestId"]
+  A["请求进入api网关"] --> B["生成requestId"]
   B --> C["请求转发到业务服务"]
   C --> D["业务服务执行操作"]
   D --> E{"成功或失败"}
-  E -- 成功 --> F["写入 success 审计日志"]
-  E -- 失败 --> G["写入 failure 审计日志"]
-  F --> H["audit_log"]
+  E -- 成功 --> F["写入success审计日志"]
+  E -- 失败 --> G["写入failure审计日志"]
+  F --> H["审计日志数据表"]
   G --> H
-  H --> I["管理员访问 /ops"]
-  I --> J["网关校验 admin/reviewer"]
+  H --> I["管理员访问"]
+  I --> J["网关校验"]
   J --> K["查询审计日志与运行摘要"]
   K --> L["展示健康状态、指标、失败请求"]
 

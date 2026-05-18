@@ -37,7 +37,7 @@
 
 发布前审核由 `requestAiAnalysis` 和 `applyReviewResult` 串起来。`requestAiAnalysis` 会根据 `AI_SERVICE_URL` 和内部 token 调用 AI 服务；如果 `AI_ANALYSIS_ON_CREATE=false` 或 AI 服务地址缺失，则返回跳过结果。`applyReviewResult` 根据 AI 返回的 decision 更新文章状态：`ALLOW` 对应 `PUBLISHED`，`LOW_PRIORITY` 对应低优先级公开，`REJECT` 对应拒绝，其余情况进入 `REVIEW_REQUIRED`。如果 AI 调用失败，文章会进入复核状态并保存失败原因。
 
-查询逻辑由 `listArticles` 和 `getArticle` 完成。列表接口只展示 `PUBLISHED` 和 `LOW_PRIORITY` 内容，并额外过滤合法性分数过低的文章。详情接口会调用 `canViewArticle`：公开内容所有人可见，非公开内容只有作者本人或审核/管理员角色可见。返回 DTO 时统一组装作者信息、AI 分析、AI 标签、普通标签、reaction 汇总和评论数。
+查询逻辑由 `listArticles` 和 `getArticle` 完成。列表接口只展示 `PUBLISHED` 和 `LOW_PRIORITY` 内容，并额外过滤合法性分数过低的文章。详情接口会调用 `canViewArticle`：公开内容所有人可见，非公开内容只有作者本人或管理员可见。返回 DTO 时统一组装作者信息、AI 分析、AI 标签、普通标签、reaction 汇总和评论数。
 
 删除逻辑由 `deleteArticle` 实现。它先检查操作者是否是作者本人或管理员，然后在事务中清理评论 reaction、评论、文章 reaction、AI 标签关系、普通标签关系、AI 分析记录，最后删除文章。这样可以避免删除后留下孤立数据。
 
@@ -71,5 +71,5 @@
 - 新文章先进入 `PENDING_REVIEW` 状态。
 - AI 分析完成后映射为公开、低优先级、复核或拒绝状态。
 - 公开列表、关注流和推荐流只展示公开状态内容。
-- 作者本人和管理员/审核员可查看非公开内容详情。
+- 作者本人和管理员可查看非公开内容详情。
 - 删除文章时清理评论、reaction、标签关系和 AI 分析关联。

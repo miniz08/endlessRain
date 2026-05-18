@@ -48,12 +48,12 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
   next();
 }
 
-export function requireReviewerOrInternal(req: Request, _res: Response, next: NextFunction): void {
-  if (isInternalRequest(req) || isReviewerRole(req.auth?.role)) {
+export function requireAdminOrInternal(req: Request, _res: Response, next: NextFunction): void {
+  if (isInternalRequest(req) || isAdminRole(req.auth?.role)) {
     next();
     return;
   }
-  next(new HttpError(403, "Analysis APIs are restricted to reviewers or internal services", "FORBIDDEN"));
+  next(new HttpError(403, "Analysis APIs are restricted to admins or internal services", "FORBIDDEN"));
 }
 
 function extractAccessToken(req: Request): string | undefined {
@@ -70,9 +70,9 @@ function isInternalRequest(req: Request): boolean {
   return typeof actual === "string" && actual.length > 0 && actual === expected;
 }
 
-function isReviewerRole(role?: string): boolean {
+function isAdminRole(role?: string): boolean {
   const normalized = role?.toLowerCase();
-  return normalized === "admin" || normalized === "reviewer";
+  return normalized === "admin";
 }
 
 function parseCookie(header: string): Record<string, string | undefined> {

@@ -82,8 +82,8 @@
               </tr>
             </tbody>
           </table>
-          <div v-else-if="canReview" class="empty">暂无失败记录</div>
-          <div v-else class="empty">需要 reviewer 或 admin 权限</div>
+          <div v-else-if="canAdmin" class="empty">暂无失败记录</div>
+          <div v-else class="empty">需要 admin 权限</div>
         </div>
 
         <div class="panel">
@@ -118,12 +118,12 @@
         <div class="panel">
           <div class="row" style="justify-content: space-between">
             <h3 style="margin: 0">内容分析查询</h3>
-            <span class="muted">{{ canReview ? "reviewer" : "需要权限" }}</span>
+            <span class="muted">{{ canAdmin ? "admin" : "需要权限" }}</span>
           </div>
           <form class="inline-form" @submit.prevent="loadAnalysis">
             <input v-model.number="articleId" type="number" min="1" placeholder="文章 ID" />
-            <button :disabled="!canReview || !articleId">查询</button>
-            <button class="primary" :disabled="!canReview || !articleId" @click.prevent="reanalyzeArticle">重新分析</button>
+            <button :disabled="!canAdmin || !articleId">查询</button>
+            <button class="primary" :disabled="!canAdmin || !articleId" @click.prevent="reanalyzeArticle">重新分析</button>
           </form>
           <p v-if="analysisError" class="error">{{ analysisError }}</p>
           <div v-if="analysis" class="stack">
@@ -135,7 +135,7 @@
         <div class="panel">
           <div class="row" style="justify-content: space-between">
             <h3 style="margin: 0">审计日志</h3>
-            <button class="ghost" :disabled="!canReview" @click="loadAuditLogs">刷新日志</button>
+            <button class="ghost" :disabled="!canAdmin" @click="loadAuditLogs">刷新日志</button>
           </div>
           <p v-if="auditError" class="error">{{ auditError }}</p>
           <table v-if="auditLogs.length" class="data-table">
@@ -171,7 +171,7 @@
         <div class="panel">
           <h3>标签库</h3>
           <p v-if="taxonomy">{{ taxonomy.count }} 个标签 · {{ taxonomy.categories.length }} 个大类</p>
-          <p v-else class="muted">需要 reviewer 或 admin</p>
+          <p v-else class="muted">需要 admin</p>
         </div>
       </aside>
     </div>
@@ -258,9 +258,9 @@ const analysis = ref<(AiAnalysis & { tags?: Array<{ name: string; confidence: nu
 const analysisError = ref("");
 const auditError = ref("");
 
-const canReview = computed(() => {
+const canAdmin = computed(() => {
   const role = user.value?.role?.toLowerCase();
-  return role === "admin" || role === "reviewer";
+  return role === "admin";
 });
 
 const metricMap = computed(() => new Map(metrics.value.map((item) => [item.routeName, item])));
@@ -281,7 +281,7 @@ async function loadOps() {
     health.value = healthPayload;
     routes.value = routesPayload.items;
     metrics.value = metricsPayload.items;
-    if (canReview.value) {
+    if (canAdmin.value) {
       await Promise.all([loadTaxonomy(), loadAuditLogs(), loadAdminSummary()]);
     }
   } finally {

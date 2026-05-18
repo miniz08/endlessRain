@@ -9,6 +9,7 @@
 | 系统业务闭环图 | [system/business-closed-loop.mmd](system/business-closed-loop.mmd) | 第 2 章系统流程分析 |
 | 微服务运行结构图 | [system/microservice-runtime.mmd](system/microservice-runtime.mmd) | 第 1 章框架介绍、第 3 章架构设计 |
 | 系统数据流总体图 | [system/data-flow-overview.mmd](system/data-flow-overview.mmd) | 第 3 章总体设计 |
+| 数据库概念 E-R 图 | [system/database-overall-er.mmd](system/database-overall-er.mmd) | 第 3 章数据库概念结构设计 |
 
 ## 模块级图表
 
@@ -22,6 +23,8 @@
 | 评论、reaction 与通知流程图 | [modules/social-feedback-flow.mmd](modules/social-feedback-flow.mmd) |
 | AI 内容评级 ER 图 | [modules/ai-rating-er.mmd](modules/ai-rating-er.mmd) |
 | 推荐画像 ER 图 | [modules/recommendation-er.mmd](modules/recommendation-er.mmd) |
+| 聊天 ER 图 | [modules/chat-er.mmd](modules/chat-er.mmd) |
+| 审计 ER 图 | [modules/audit-er.mmd](modules/audit-er.mmd) |
 | 推荐展示流程图 | [modules/recommendation-flow.mmd](modules/recommendation-flow.mmd) |
 | 单对单聊天流程图 | [modules/chat-flow.mmd](modules/chat-flow.mmd) |
 | 审计监控流程图 | [modules/audit-flow.mmd](modules/audit-flow.mmd) |

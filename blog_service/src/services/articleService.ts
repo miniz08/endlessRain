@@ -1,4 +1,5 @@
 import { prisma } from "../../lib/prisma.js";
+import type { Prisma } from "@prisma/client";
 import { HttpError } from "../utils/validation.js";
 import { sanitizeContent, summarizeContent } from "./contentSanitizer.js";
 import { buildArticleReactionSummaries, type ReactionSummary } from "./reactionService.js";
@@ -45,7 +46,7 @@ export type ArticleAiProcessing = {
 };
 
 const PUBLIC_ARTICLE_STATUSES: ArticleReviewStatus[] = ["PUBLISHED", "LOW_PRIORITY"];
-const REVIEWER_ROLES = new Set(["admin", "reviewer"]);
+const ADMIN_ROLES = new Set(["admin"]);
 
 export async function listArticles(input: {
   viewerId?: number;
@@ -53,30 +54,43 @@ export async function listArticles(input: {
   authorId?: number;
   authorIds?: number[];
   tag?: string;
+  keyword?: string;
   limit: number;
   cursor?: number;
   hideBlocked?: boolean;
 }) {
   const includePrivate =
-    Boolean(input.viewerRole && REVIEWER_ROLES.has(input.viewerRole.toLowerCase())) ||
+    Boolean(input.viewerRole && ADMIN_ROLES.has(input.viewerRole.toLowerCase())) ||
     Boolean(input.authorId && input.viewerId === input.authorId);
 
+  const conditions: Prisma.articleWhereInput[] = [];
+  if (!includePrivate) conditions.push({ status: { in: PUBLIC_ARTICLE_STATUSES } });
+  if (input.authorId) conditions.push({ authorId: input.authorId });
+  if (input.authorIds) conditions.push({ authorId: { in: input.authorIds } });
+  if (input.cursor) conditions.push({ id: { lt: input.cursor } });
+  if (input.tag) {
+    conditions.push({
+      OR: [
+        { tag: input.tag },
+        { article_tag_on_article: { some: { article_tag: { name: input.tag } } } },
+        { article_ai_tag_on_article: { some: { article_ai_tag: { name: input.tag } } } },
+      ],
+    });
+  }
+  if (input.keyword) {
+    conditions.push({
+      OR: [
+        { content: { contains: input.keyword } },
+        { tag: { contains: input.keyword } },
+        { user: { username: { contains: input.keyword } } },
+        { article_tag_on_article: { some: { article_tag: { name: { contains: input.keyword } } } } },
+        { article_ai_tag_on_article: { some: { article_ai_tag: { name: { contains: input.keyword } } } } },
+      ],
+    });
+  }
+
   const articles = await prisma.article.findMany({
-    where: {
-      ...(includePrivate ? {} : { status: { in: PUBLIC_ARTICLE_STATUSES } }),
-      ...(input.authorId ? { authorId: input.authorId } : {}),
-      ...(input.authorIds ? { authorId: { in: input.authorIds } } : {}),
-      ...(input.tag
-        ? {
-            OR: [
-              { tag: input.tag },
-              { article_tag_on_article: { some: { article_tag: { name: input.tag } } } },
-              { article_ai_tag_on_article: { some: { article_ai_tag: { name: input.tag } } } },
-            ],
-          }
-        : {}),
-      ...(input.cursor ? { id: { lt: input.cursor } } : {}),
-    },
+    where: conditions.length ? { AND: conditions } : {},
     orderBy: [{ posttime: "desc" }, { id: "desc" }],
     take: input.limit + 1,
     include: articleInclude(),
@@ -336,7 +350,7 @@ function isVisibleInFeed(article: NonNullable<ArticleWithRelations>): boolean {
 function canViewArticle(article: NonNullable<ArticleWithRelations>, viewer?: { id?: number; role?: string }): boolean {
   if (isPublicArticleStatus(article.status)) return true;
   if (viewer?.id && viewer.id === article.authorId) return true;
-  return Boolean(viewer?.role && REVIEWER_ROLES.has(viewer.role.toLowerCase()));
+  return Boolean(viewer?.role && ADMIN_ROLES.has(viewer.role.toLowerCase()));
 }
 
 export function isPublicArticleStatus(status?: string | null): boolean {

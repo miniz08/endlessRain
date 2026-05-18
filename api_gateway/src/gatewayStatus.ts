@@ -103,8 +103,8 @@ export async function auditLogsController(req: Request, res: Response): Promise<
     return;
   }
 
-  if (!isReviewerRole(auth.role)) {
-    res.status(403).json({ error: { code: "FORBIDDEN", message: "Reviewer or admin role required" } });
+  if (!isAdminRole(auth.role)) {
+    res.status(403).json({ error: { code: "FORBIDDEN", message: "Admin role required" } });
     return;
   }
 
@@ -148,8 +148,8 @@ export async function adminSummaryController(req: Request, res: Response): Promi
     return;
   }
 
-  if (!isReviewerRole(auth.role)) {
-    res.status(403).json({ error: { code: "FORBIDDEN", message: "Reviewer or admin role required" } });
+  if (!isAdminRole(auth.role)) {
+    res.status(403).json({ error: { code: "FORBIDDEN", message: "Admin role required" } });
     return;
   }
 
@@ -290,9 +290,9 @@ function parseCookie(header: string): Record<string, string | undefined> {
   return result;
 }
 
-function isReviewerRole(role?: string): boolean {
+function isAdminRole(role?: string): boolean {
   const normalized = role?.toLowerCase();
-  return normalized === "admin" || normalized === "reviewer";
+  return normalized === "admin";
 }
 
 function matchGatewayRoute(pathname: string): GatewayRoute | undefined {

@@ -1,10 +1,10 @@
 flowchart TD
-  A["用户提交文章"] --> B["blog_service 校验并清洗内容"]
-  B --> C["写入 article<br/>status=PENDING_REVIEW"]
-  C --> D["调用 ai_service 分析"]
-  D --> E["生成评分、标签、riskLevel、decision"]
-  E --> F["持久化 AI 分析结果"]
-  F --> G{"decision"}
+  A["用户提交文章"] --> B["系统校验并清洗内容"]
+  B --> C["写入数据库，状态为待审核"]
+  C --> D["调用AI分析"]
+  D --> E["生成评分、标签"]
+  E --> F["分析结果写入数据库"]
+  F --> G{"分析结构"}
   G -- ALLOW --> H["status=PUBLISHED"]
   G -- LOW_PRIORITY --> I["status=LOW_PRIORITY"]
   G -- REVIEW --> J["status=REVIEW_REQUIRED"]
@@ -18,4 +18,3 @@ flowchart TD
   J --> O
   K --> O
   O --> P["写入审计日志"]
-

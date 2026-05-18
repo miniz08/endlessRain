@@ -1,0 +1,89 @@
+5 RESULTS
+Using FRD, we estimated the effect of the “Hide” and “Delete” in-
+terventions for the thread- and user-level scenarios. We depict the
+standardized effects associated with our key findings in Fig. 6 and
+present all the estimated effects in Table 2.
+5.1 Thread level
+Fig. 6(a) shows the standardized effect of deleting comments on the
+number of comments and interventions in the follow-up period in
+the thread-level scenario). Comment deletion had a significant effect
+on both the number of subsequent interventions and the number of
+subsequent comments in threads that had fewer than 20 posts prior
+to the intervention. When comments from the original commenter
+were included (≤20/All), the intervention reduced the number of
+comments by −13.16 (95% CI: −21.23, −5.10) and the number of
+subsequent interventions by −0.946 (95% CI: −1.59, −0.299; see
+non-standardized effects shown in Table 2). To get a sense of the
+effect size, we calculated the average number of comments and
+interventions in the follow-up period received by threads right
+below the intervention threshold, where 𝑆 ∈ [ 𝑡delete − 0.01, 𝑡delete).
+Threads in the ≤20/All scenario just before the threshold received
+1.5 interventions (95% CI: 1.3, 1.9) and 27.7 comments (95% CI: 23.2,
+33., 2) on average, suggesting that these effects were substantial.
+Still considering the All scenario, for both outcomes, the effect
+of deletions was neither substantial nor significant for threads that
+already had more than 20 comments when the delete interven-
+tion happened [e.g., see >20/All in Fig. 6(a)]. Deleting any single
+comment may have less of an effect in longer threads because par-
+ticipants are less likely to see such a comment (e.g., because such
+a comment may already have been hidden or because there are at
+least 19 other comments to see). Effects may also have been more
+difficult to observe because of the smaller sample size—there were
+fewer threads with more than 20 comments than threads with 20
+or fewer comments. Hiding comments, as opposed to deleting, had
+small and statistically insignificant effects on the number of subse-
+quent interventions and comments for all setups considered (see
+Table 2; we discuss this further in Sec. 6).
+We additionally computed the same outcomes in the follow-up
+period, not considering comments by the original commenter to
+understand if the effect was due to changes in the behavior of the
+original commenter (i.e., the individual who had their comment
+intervened upon) or other users in the thread (scenarios≤20/Other
+and >20/Other in Fig. 6(a) and Table 2). We found that standardized
+effects remained qualitatively similar, e.g. comments were reduced
+−0.069 standard deviations (SDs) in the ≤20/All setup vs. −0.037
+SDs in the ≤20/Other setup, suggesting that the intervention dis-
+couraged other users from posting rule-breaking comments.
+
+Automated Content Moderation Increases Adherence to Community Guidelines
+5.2 User level
+For the user-level scenario, we considered both cases where users
+did and did not have comments deleted previously. We make this
+distinction as the interventions for these users differ: “first-time
+offenders” only receive a warning, whereas “repeat offenders” ad-
+ditionally have their posting privileges suspended for 24 hours.
+The suspension period for repeat offenders is not considered in the
+follow-up period as it could explain behavior differences.
+User level: first-time offenders.Fig. 6(b) shows the effect of dele-
+tions for first-time offenders. Again, deleting comments had signifi-
+cant effects on both outcomes. Considering the 7 days following
+the intervention, deletion decreased the number of comments by
+4.6 and decreased the number of subsequent interventions by 0.12.
+To get a sense of the effect size, we calculated outcomes for users
+right below the intervention threshold, 𝑆 ∈ [ 𝑡delete − 0.01, 𝑡delete).
+These users received on average0.23 interventions in the follow-up
+period (95% CI: 0.21, 0.25) and made on average 13 comments (95%
+CI: 12.6, 13.4), suggesting that the effects are substantial. Setups that
+considered larger intervention periods (21 and 28 days) showed that,
+while the effect on the subsequent number of comments waned
+with time (i.e., effects were smaller for longer follow-up periods),
+the effect on the number of subsequent interventions was largely
+stable. This indicates that automated content moderation has pos-
+itive, long-lasting effects on subsequent rule-breaking behavior.
+Hiding comments had small and statistically insignificant effects
+on the number of subsequent interventions and comments.
+User level: repeat offenders.Fig. 6(c) shows the effect of deletions
+for repeat offenders. For these users, deleting comments yielded
+decreases in both the number of interventions and comments in
+the follow-up period. The wider confidence intervals here may
+be partially explained by the smaller sample, as fewer users had
+their comments deleted a second time. Nonetheless, for 3 out of
+the 4 time periods considered (7, 14, 28 days), we again observed
+significant effects that were similar in magnitude to the effects
+observed in the “first-time offender” setup. Considering a 28-day
+follow-up period, deletions decreased interventions received by
+repeat offenders by 0.28 (95% CI: −0.48, −0.078) vs. 0.192 for first-
+time offenders. This suggests that deletions are also effective for
+users who have previously broken community guidelines. Hiding
+comments had small and statistically insignificant effects on the
+considered outcomes.

@@ -3,6 +3,10 @@
     <header class="topbar">
       <div class="topbar-inner">
         <NuxtLink class="brand" to="/">LongSeason 社交平台</NuxtLink>
+        <form class="topbar-search" role="search" @submit.prevent="submitSiteSearch">
+          <input v-model.trim="siteSearch" type="search" placeholder="搜索博客 / 用户" autocomplete="off" />
+          <button class="primary" :disabled="siteSearch.length === 0">搜索</button>
+        </form>
         <nav class="nav">
           <NuxtLink to="/">推荐</NuxtLink>
           <NuxtLink to="/topics">主题</NuxtLink>
@@ -28,10 +32,12 @@
 <script setup lang="ts">
 const { blogApi } = useApi();
 const { user, refreshMe, logout } = useAuth();
+const route = useRoute();
 const unreadNotifications = useState<number>("notifications:unread", () => 0);
+const siteSearch = ref("");
 const isOperator = computed(() => {
   const role = user.value?.role?.toLowerCase();
-  return role === "admin" || role === "reviewer";
+  return role === "admin";
 });
 
 watch(
@@ -50,8 +56,22 @@ onMounted(async () => {
   await refreshMe();
 });
 
+watch(
+  () => [route.path, route.query.q],
+  () => {
+    siteSearch.value = route.path === "/search" && typeof route.query.q === "string" ? route.query.q : "";
+  },
+  { immediate: true },
+);
+
 async function loadUnreadNotifications() {
   const payload = await blogApi<{ count: number }>("/notifications/unread-count").catch(() => ({ count: 0 }));
   unreadNotifications.value = payload.count;
+}
+
+async function submitSiteSearch() {
+  const keyword = siteSearch.value.trim();
+  if (!keyword) return;
+  await navigateTo(`/search?q=${encodeURIComponent(keyword)}`);
 }
 </script>

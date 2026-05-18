@@ -46,6 +46,8 @@
 
 免费大模型服务可能存在额度限制、响应变慢或临时不可用等情况，因此该方案在工程上需要配合超时、重试和降级机制。当前 AI 服务已经将模型调用封装在独立 provider 中，外部模型异常时可以返回保守复核结果，使文章进入人工复核或稍后重试流程，避免未分析内容直接公开。模型接口密钥和服务地址通过环境变量配置，内部文章分析接口通过服务 token 调用，不直接暴露给普通用户。由此可见，免费大模型轮询既能满足开发、测试和小规模运行阶段的 AI 文本分析需求，也保留了后续切换付费模型、私有化模型或混合模型池的扩展空间。
 
+在推荐系统复杂度方面，当前推荐流属于中等复杂度的特征加权个性化排序方案。它不是单纯按照发布时间或热度展示内容，而是先从公开状态文章中取得候选集，再结合用户画像标签、AI 标签、作者质量、内容质量、风险惩罚、发布时间和已看记录等特征计算推荐分。因此，该方案已经具备用户画像、内容质量、行为反馈和展示过滤形成闭环的能力。根据推荐展示专项验证，系统在 3 个画像用户、36 个作者用户、291 篇文章和 1021 条推荐事件的数据规模下，能够让不同画像用户得到不同主题的推荐结果，并且已看惩罚和非公开内容过滤均能生效。从算法实现看，当前推荐主要成本集中在候选内容查询、辅助特征读取、逐篇打分和排序，整体复杂度仍处于可控范围；与依赖向量召回、深度学习模型、实时特征平台和 A/B 实验系统的工业级推荐平台相比，实现成本明显更低，也更适合作为本课题的可解释推荐原型。后续如果访问量和数据规模继续增加，可以在现有结构上增加候选召回、缓存、TopK 排序优化或机器学习排序模型。
+
 因此，从技术选择、服务拆分、数据库访问和部署方式来看，本课题在技术上是可行的。
 
 #### 2.1.2 经济可行性分析
@@ -62,37 +64,19 @@
 
 ### 2.2 需求分析
 
-#### 2.2.1 功能需求分析
+2.2.1 功能需求分析
+系统主要面向普通用户与系统维护人员两类角色。由于系统的目标是构建一个可追踪与维护的高安全性闭环系统，因此其功能需求除了“用户怎样使用平台”之外，还有“平台如何进行维护”
+对于普通用户，平台主要包括以下功能：
+（1）注册登录功能：用户首次进入系统时，需要通过用户名、邮箱、密码完成注册。已有账号的用户可以通过用户名或邮箱登录。登录成功后，浏览器会缓存用户信息，用户即可进入首页浏览内容、发布文章、评论和聊天。用户退出后，缓存失效，需要重新登录才能继续使用受保护功能。
+（2）内容发布与浏览功能。用户可以在首页或发布入口填写文章内容和标签并提交。文章提交后不会马上进入公共页面，而是先进入审核流程。用户可以在首页、关注、用户主页和文章详情页查看已经公开的内容，也可以查看自己发布内容的处理结果。
+（3）社交互动功能。用户可以关注其他用户，查看其关注列表和粉丝列表。可以在文章下发表评论或回复评论，也可以对文章和评论添加emoji反馈。平台提供私信聊天功能，用户可以进入聊天页面通过用户名搜索单对单发送和接收消息，或者进入对方主页私信。
+（4）通知反馈功能。用户发布内容后，系统会把 AI 审核结果反馈到通知中心。当其他用户对博客进行反馈或关注自己时，也会产生通知。用户可以查看通知列表、未读数量，并按照反馈类型筛选通知。
+（5）个人主页和综合评分功能。用户主页展示用户基础资料、发布内容、关注关系和综合行为评分。综合评分是根据文章质量、审核状态和互动反馈计算得到，用于反映用户在平台中的内容表现。
 
-本系统主要面向普通用户、审核管理人员和系统维护人员三类对象。由于平台属于社交内容系统，用户进入系统后并不是只完成单次查询，而是会持续进行发布、浏览、互动、聊天和接收反馈等操作。因此，功能需求需要围绕“用户怎样使用平台”和“平台怎样处理内容”两个方面展开。
+对于系统维护人员，平台主要包括以下功能：
+（1）AI 分析与内容处理查看。管理员可以查看文章 AI 分析结果，包括友好度、理性度、合法性、专业度、风险等级、处理原因和处理建议。对于进入复核状态的内容，系统人员需要人工审核。
+（2）审计日志与运行状态查看。管理员可以查看系统健康状态、审计日志和失败请求摘要。系统出现异常时，可以通过接口路径和状态码定位问题。
 
-普通用户端主要包括以下功能。
-
-（1）注册登录功能。用户首次使用系统时，需要通过用户名、邮箱和密码完成注册；已有账号的用户可以通过用户名或邮箱登录。登录成功后，系统保存会话状态，用户即可进入首页浏览内容、发布文章、评论和聊天。用户退出后，会话失效，需要重新登录才能继续使用受保护功能。
-
-（2）内容发布与浏览功能。用户可以在首页或发布入口填写文章内容和标签并提交。文章提交后不会马上进入公共页面，而是先进入审核流程。用户可以在首页、推荐流、关注流、用户主页和文章详情页查看已经公开的内容，也可以查看自己发布内容的处理结果。
-
-（3）社交互动功能。用户可以关注其他用户，查看关注列表和粉丝列表；可以在文章下发表评论或回复评论；也可以对文章和评论添加 Emoji 反馈。对于一对一沟通场景，平台提供私信聊天功能，用户可以进入聊天线程发送和接收消息。
-
-（4）通知反馈功能。用户发布内容后，系统会把 AI 审核结果反馈到通知中心；当其他用户评论、回复、添加 Emoji 或关注自己时，也会产生通知。用户可以查看通知列表、未读数量，并将通知标记为已读。
-
-（5）个人主页和综合评分功能。用户主页展示用户基础资料、发布内容、关注关系和综合行为评分。综合评分不是单独填写的静态信息，而是根据文章质量、审核状态和互动反馈计算得到，用于反映用户在平台中的内容表现。
-
-审核管理人员端主要包括以下功能。
-
-（1）AI 分析与内容处理查看。审核员或管理员可以查看文章 AI 分析结果，包括友好度、理性度、合法性、专业度、风险等级、处理原因和处理建议。对于进入复核状态的内容，系统需要保留足够的信息，方便后续人工判断。
-
-（2）审计日志与运行状态查看。管理员可以查看网关健康状态、路由指标、审计日志和失败请求摘要。系统出现异常时，可以通过请求 ID、用户 ID、接口路径和状态码定位问题。
-
-（3）权限管理功能。普通用户不能访问审计和管理类接口，审核员和管理员根据角色获得不同范围的访问能力。角色控制需要贯穿网关、业务服务和具体接口。
-
-系统维护层主要包括以下功能。
-
-（1）多服务转发与健康检查。API 网关负责把前端请求转发到用户服务、博客服务、AI 服务和聊天服务，并提供健康检查接口。
-
-（2）推荐画像与行为记录。用户浏览、点击、停留、点赞、评论、收藏、关注、隐藏和举报等行为会写入推荐事件表。系统根据这些事件计算用户画像，并在推荐流中改变文章排序。
-
-（3）数据一致性维护。用户、文章、评论、关注、通知、AI 分析、推荐事件和聊天数据之间存在较多关联，系统需要通过唯一约束、外键关系和事务处理保证数据能够正确增删改查。
 
 #### 2.2.2 安全需求分析
 
@@ -100,7 +84,7 @@
 
 第一，登录身份需要可靠。用户登录后由系统签发 access token 和 refresh token，其中 refresh token 不以明文保存，而是保存哈希值，并支持刷新和撤销。这样用户退出登录或刷新会话时，旧令牌不会继续有效。
 
-第二，不同角色的接口入口需要分开。普通用户可以发布文章、评论、关注和聊天，但不能访问审计日志、网关指标和 AI 管理类接口。审核员和管理员可以进入管理相关接口，但删除文章、删除评论、查看聊天线程等操作仍需要检查数据归属，避免只凭登录状态就操作他人数据。
+第二，不同角色的接口入口需要分开。普通用户可以发布文章、评论、关注和聊天，但不能访问审计日志、网关指标和 AI 管理类接口。管理员可以进入管理相关接口，但删除文章、删除评论、查看聊天线程等操作仍需要检查数据归属，避免只凭登录状态就操作他人数据。
 
 第三，内容公开前需要经过处理。文章发布后先保存为 `PENDING_REVIEW`，随后由 AI 服务生成分析结果。只有 `PUBLISHED` 和 `LOW_PRIORITY` 状态可以进入公共列表、关注流和推荐流；`REVIEW_REQUIRED`、`REJECTED` 等状态不能被普通访问者看到。这样可以避免未审核或高风险内容直接出现在平台首页。
 
@@ -109,54 +93,40 @@
 ### 2.3 系统流程分析
 
 本系统的整体流程可以按照普通用户、内容处理、推荐展示和管理员查看四条线来说明。
+2.3.1 普通用户使用流程
+普通用户进入平台之后，在未登陆的情况下仅能查看部分默认公开的文章，且推荐机制不会纳入用户画像的影响。在注册，登陆之后，会根据其特征反馈，如浏览、点赞、评论能行为生产用户画像，首页推荐也会纳入其影响。
+若用户需要发布内容，则在文本编辑器中填写正文和标签并提交，提交完成后，文章先进入待审核状态，用户可以在通知中心得到处理结果。
 
-#### 2.3.1 普通用户使用流程
 
-普通用户进入平台后，首先选择注册或登录。登录成功后，用户可以进入首页浏览公开文章，也可以进入推荐流查看系统根据画像生成的内容。若用户需要发布内容，则在发布框中填写正文和标签并提交。提交完成后，文章先进入待审核状态，用户可以等待通知中心返回处理结果。
 
-用户在浏览内容时，可以进行评论、回复、添加 Emoji、关注作者和私信聊天等操作。这些操作会改变前端页面中的互动状态，也会在后端生成通知、推荐事件和审计记录。用户再次进入推荐流时，系统会根据新的行为记录调整推荐排序。
 
-#### 2.3.2 内容审核与展示流程
+2.3.2 内容审核与展示流程
+普通用户文章发布后，系统先保存文章基础信息，再调用 AI 分析服务。AI 服务会对文章生成四项评分、风险等级、处理决策、原因、建议和标签。系统根据处理决策修改文章状态：允许发布的文章进入公开状态，需要降低推荐优先级的文章进入低优先级状态，风险较高的文章进入复核或拒绝状态。
 
-文章发布后，博客服务先保存文章基础信息，再调用 AI 分析服务。AI 服务会对文章生成四项评分、风险等级、处理决策、原因、建议和标签。博客服务根据处理决策修改文章状态：允许发布的文章进入 `PUBLISHED`，需要降低推荐优先级的文章进入 `LOW_PRIORITY`，风险较高的文章进入复核或拒绝状态。
+公开展示时，首页列表、关注流和推荐流只读取公开状态内容。文章详情页则根据访问者身份判断是否能查看非公开内容：作者本人可以查看自己的处理结果，管理员可以查看复核相关内容，普通用户或者未注册用户不能查看。
 
-公开展示时，首页列表、关注流和推荐流只读取公开状态内容。文章详情页则根据访问者身份判断是否能查看非公开内容：作者本人可以查看自己的处理结果，审核员和管理员可以查看复核相关内容，普通访问者不能查看。
+2.3.3 博客推荐流程
+系统会先筛选那些处于公开状态的博客，再结合用户画像、博客评分、发布时间等进行综合排序，并生成推荐分（具体计算方式请参考4.7 基于评级机制的推荐与展示控制功能）。推荐结果返回后，系统会把本次结果写入推荐请求日志。
+用户点击、停留、阅读完成、点赞、评论、收藏、关注、隐藏或举报文章时，这些行为会写入推荐事件表，并更新文章日统计和用户画像。由此形成“推荐展示、用户行为、画像更新、再次推荐”的闭环。
 
-#### 2.3.3 推荐反馈流程
+2.3.4 管理员查看流程
+管理员登录后，可以进入运维页面查看服务健康、网关路由指标、审计日志和失败请求摘要。若某个操作出现异常，可以结合请求 ID、接口路径、用户 ID 和状态码进行排查。该流程主要用于保障系统运行过程中的可观察性。
 
-推荐流不是单纯按照发布时间展示。系统先读取公开候选文章，再结合用户画像、AI 标签、作者评分、文章质量、发布时间、风险惩罚和已看记录进行排序。推荐结果返回后，系统会把本次结果写入推荐请求日志，并把每篇返回文章记录为曝光事件。
 
-当用户点击、停留、阅读完成、点赞、评论、收藏、关注、隐藏或举报文章时，这些行为会继续写入推荐事件表，并更新文章日统计和用户画像。由此形成“推荐展示、用户行为、画像更新、再次推荐”的闭环。
-
-#### 2.3.4 管理员查看流程
-
-管理员或审核员登录后，可以进入运维页面查看服务健康、网关路由指标、审计日志和失败请求摘要。若某个操作出现异常，可以结合请求 ID、接口路径、用户 ID 和状态码进行排查。该流程主要用于保障系统运行过程中的可观察性。
-
-> 图 2-1 插入位置：系统业务闭环流程图。Mermaid 源文件：[business-closed-loop.mmd](../diagrams/system/business-closed-loop.mmd)
-
-> 图 2-2 插入位置：内容发布与审核流程图。Mermaid 源文件：[content-review-flow.mmd](../diagrams/modules/content-review-flow.mmd)
 
 ## 第 3 章 总体设计
 
 ### 3.1 系统整体功能模块设计
-
-本平台的功能结构围绕“用户发布内容、系统处理内容、用户继续互动、管理员查看运行情况”展开。结合前端页面和后端服务划分，系统可以分为八个主要模块。
-
-（1）用户认证与权限管理模块。该模块是系统入口，主要完成注册、登录、退出、刷新会话、当前用户识别和角色判断。用户登录成功后才能进行发布、评论、关注和聊天等操作。审核员和管理员访问审计、AI 管理和运维接口时，还需要进一步进行角色校验。
-
-（2）社交内容发布与管理模块。该模块负责文章发布、文章列表、文章详情、用户主页文章、标签和删除操作。文章发布后先进入审核状态，再根据 AI 处理结果决定是否公开展示。
-
-（3）用户社交关系与互动模块。该模块包括关注、取消关注、粉丝列表、关注列表、评论、回复、文章 Emoji、评论 Emoji 和私信聊天。用户之间的互动既会改变页面展示，也会产生通知和推荐事件。
-
-（4）消息通知与处理反馈模块。该模块把文章审核结果、评论、回复、Emoji 和关注等反馈统一放入通知中心。用户可以查看未读数量，也可以将单条或全部通知标记为已读。
-
+本平台的功能结构围绕内容发布、社交关系、内容审核治理等社交平台常见基础功能设计，结合系统的维护，可以分为八个主要模块。
+（1）用户认证与权限管理模块。该模块是系统入口，主要完成注册、登录、退出、刷新会话、当前用户识别。用户登录成功后才能进行发布、评论、关注和聊天等操作。管理员访问审计、AI 管理和运维接口时，还需要进一步进行角色校验。
+（2）社交内容发布与管理模块。该模块负责文章发布、文章列表、文章详情、用户主页文章、标签和删除操作。文章发布后先进入审核状态，再根据 AI 处理与人工复核结果决定是否公开展示。
+（3）用户社交关系与互动模块。该模块包括关注、取消关注、关注列表、评论、回复、和私信聊天。用户之间的互动既会改变页面展示，也会产生通知和推荐事件。
+（4）消息通知与处理反馈模块。该模块把文章审核结果、评论、回复、Emoji 和关注等反馈统一放入通知中心。用户可以查看未读数量，也可以将单条或全部通知标记为已读，也可以分消息类型筛选查看。
 （5）AI 内容评分模块。该模块负责调用 AI 分析服务，生成文章的友好度、理性度、合法性、专业度评分，同时生成风险等级、处理决策、原因、建议和 AI 标签。
-
-（6）用户综合行为评分模块。该模块根据用户发布内容的 AI 分数、审核状态和互动反馈计算综合评分，并在用户主页中展示评分等级和风险信号。
-
+（6）用户综合行为评分模块。该模块根据用户发布内容的 AI 分数、审核状态和互动反馈计算综合评分，并在用户主页中展示评分等级和个人画像。
 （7）推荐与展示模块。该模块负责首页列表、关注流和推荐流。推荐流会读取用户画像、AI 标签、作者质量、内容质量、已看记录和风险分级，计算排序结果。
-
 （8）安全日志记录与审计模块。该模块记录关键请求和运行指标，管理员可以根据审计日志、网关健康和路由指标判断系统是否正常运行。
+
 
 > 图 3-1 插入位置：系统数据流总体图。Mermaid 源文件：[data-flow-overview.mmd](../diagrams/system/data-flow-overview.mmd)
 
@@ -164,41 +134,239 @@
 
 #### 3.2.1 数据库概念结构设计
 
-数据库概念结构主要围绕用户、文章、评论、关注、通知、AI 分析、推荐事件、聊天和审计日志等实体展开。用户是系统中最基础的实体，文章、评论、关注、聊天和通知都直接或间接与用户相关。
+数据库概念结构主要围绕用户、文章、评论、关注、通知、AI 分析、推荐事件、聊天和审计日志等展开。根据系统功能来看，核心实体可以分为六组：
 
-从实体关系看，用户与文章是一对多关系，一个用户可以发布多篇文章；文章与 AI 分析是一对一关系，一篇文章对应一条当前分析结果；文章与评论是一对多关系，一篇文章可以拥有多条评论；用户与用户之间通过关注表形成多对多关系；文章与标签之间通过关联表形成多对多关系；用户与文章之间还会通过推荐事件、已看记录和 Emoji 反馈形成多种行为关系。
+（1）用户及其相关信息实体。用户是系统最基础的实体，其他实体大多直接或间接与用户关联。用户相关信息包括个人资料、登录认证信息和推荐画像。
 
-推荐相关数据与普通社交数据也存在联系。用户浏览、点击、评论和点赞文章时，会产生推荐事件；推荐事件再计算出用户画像；用户画像又会影响后续推荐流中的文章排序。这样数据库中的内容、行为和推荐结果能够形成连续的数据链路。
+（2）文章、标签及反馈实体。文章是系统内容的核心实体，评论和回复以文章为承载对象，Emoji 反馈用于记录用户对文章或评论的态度。文章标签分为用户主动添加的标签和系统分析得到的标签，二者都通过关联实体与文章建立多对多关系。
 
-> 图 3-2 插入位置：用户认证与权限模块 ER 图。Mermaid 源文件：[auth-er.mmd](../diagrams/modules/auth-er.mmd)
+（3）社交互动及通知实体。社交互动包括用户之间的关注、评论回复、Emoji 反馈和私信聊天。通知实体把内容审核结果、评论、回复、Emoji 和关注等事件统一保存，便于用户集中查看。
 
-> 图 3-3 插入位置：内容管理 ER 图。Mermaid 源文件：[content-er.mmd](../diagrams/modules/content-er.mmd)
+（4）AI 分析实体。AI 分析实体记录文章的四维评分、风险等级和处理结果。当前文章与 AI 分析结果是一对一关系；AI 分析标签不是任意生成的新标签，而是系统根据预设标签库匹配出的结构化标签。
 
-> 图 3-4 插入位置：社交关系与通知 ER 图。Mermaid 源文件：[social-notification-er.mmd](../diagrams/modules/social-notification-er.mmd)
+（5）推荐流相关实体。推荐流相关实体记录用户对文章的曝光、点击、停留、阅读完成、点赞、评论、收藏、关注作者、隐藏和举报等行为，这些行为会进一步影响用户画像、已看记录和文章统计。
+
+（6）聊天与审计实体。聊天线程表示两个用户之间的一对一会话，聊天消息依附于聊天线程。审计日志记录关键请求、操作结果和请求 ID，用于管理员追踪异常。
+
+从关系类型看，本系统主要包含以下三类关系：
+
+一对一：文章与当前 AI 分析结果是一对一关系；用户与推荐画像也是一对一关系。
+
+一对多：用户与文章、文章与评论、用户与通知、聊天线程与聊天消息、文章与推荐事件等属于一对多关系。
+
+多对多：用户与用户通过关注实体形成多对多关系；文章与用户标签、文章与 AI 分析标签通过关联实体形成多对多关系；用户与文章还会通过推荐事件、已看记录和 Emoji 反馈形成多种行为关系。
+
+根据上述实体划分和关系类型，可以得到本系统数据库概念 E-R 图。总体 E-R 图用于说明全局实体关系，但由于系统实体较多，单张图不适合承载所有细节。因此，本文同时按用户认证、文章内容、社交通知、AI 分析、推荐、聊天和审计等模块拆分出多张小型 E-R 图，使每张图只关注一个业务范围内的实体联系。具体字段结构在 3.2.2 中说明。
+
+> 图 3-2 插入位置：数据库概念 E-R 图。Mermaid 源文件：[database-overall-er.mmd](../diagrams/system/database-overall-er.mmd)
+
+> 图 3-3 插入位置：用户与认证模块 E-R 图。Mermaid 源文件：[auth-er.mmd](../diagrams/modules/auth-er.mmd)
+
+> 图 3-4 插入位置：文章、标签与反馈模块 E-R 图。Mermaid 源文件：[content-er.mmd](../diagrams/modules/content-er.mmd)
+
+> 图 3-5 插入位置：社交互动与通知模块 E-R 图。Mermaid 源文件：[social-notification-er.mmd](../diagrams/modules/social-notification-er.mmd)
+
+> 图 3-6 插入位置：AI 分析模块 E-R 图。Mermaid 源文件：[ai-rating-er.mmd](../diagrams/modules/ai-rating-er.mmd)
+
+> 图 3-7 插入位置：推荐相关模块 E-R 图。Mermaid 源文件：[recommendation-er.mmd](../diagrams/modules/recommendation-er.mmd)
+
+> 图 3-8 插入位置：聊天模块 E-R 图。Mermaid 源文件：[chat-er.mmd](../diagrams/modules/chat-er.mmd)
+
+> 图 3-9 插入位置：审计模块 E-R 图。Mermaid 源文件：[audit-er.mmd](../diagrams/modules/audit-er.mmd)
 
 #### 3.2.2 数据库逻辑结构设计
 
-根据系统功能，数据库表可以按用途分为六类。
+逻辑结构设计的主要任务是把概念结构中的实体和联系转化为关系数据库表。本小节按业务域列出主要数据表，表格仅保留表名、列名、类型和注释，外键关系主要通过 3.2.1 的 E-R 图表达。
 
-第一类是用户与认证表，主要包括 `user` 和 `auth_refresh_token`。`user` 表保存用户名、邮箱、密码哈希、角色、头像、个人简介以及专业度和友好度等评分字段；`auth_refresh_token` 表保存刷新令牌哈希、过期时间和撤销时间，用于维持登录会话。
+（1）用户与认证相关表
 
-第二类是内容与互动表，主要包括 `article`、`comment`、`article_reaction` 和 `comment_reaction`。`article` 表保存文章正文、作者、发布时间、标签和审核状态；`comment` 表保存文章评论、回复关系和评论状态；两个 reaction 表保存用户对文章或评论添加的 Emoji。
+用户表保存基础资料和长期评分，认证令牌表保存刷新会话所需的信息。
 
-第三类是社交关系和通知表，包括 `follow` 和 `notification`。`follow` 表使用关注者和被关注者的组合表示用户关系；`notification` 表保存审核结果、评论提醒、回复提醒、Emoji 提醒和关注提醒。
+表 3-1 用户与认证相关表
 
-第四类是 AI 分析表，包括 `article_ai_analysis`、`article_ai_tag` 和 `article_ai_tag_on_article`。分析表保存四项评分、风险等级、处理原因和建议；标签表保存 AI 生成的标签名称；关联表保存文章与 AI 标签之间的权重和置信度。
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| user | id | int(11) | 用户id |
+| user | username | varchar(191) | 用户名 |
+| user | email | varchar(191) | 邮箱 |
+| user | password | varchar(191) | 密码哈希 |
+| user | avatar、bio | varchar(191)、varchar(280) | 头像、简介 |
+| user | role | varchar(191) | 角色 |
+| user | professionalism、friendliness | int(11) | 专业度分、友好度分 |
+| user | createdAt、updatedAt | datetime(3) | 创建时间、更新时间 |
+| auth_refresh_token | id | bigint(20) | 令牌id |
+| auth_refresh_token | userId | int(11) | 用户id |
+| auth_refresh_token | tokenHash、csrfToken | char(64) | 令牌哈希、CSRF令牌 |
+| auth_refresh_token | expiresAt、revokedAt | datetime(3) | 过期时间、撤销时间 |
+| auth_refresh_token | replacedByTokenHash | char(64) | 新令牌哈希 |
+| auth_refresh_token | userAgent、ipAddress | varchar(255)、varchar(64) | 设备信息、IP地址 |
 
-第五类是推荐画像表，包括 `reco_event`、`reco_request_log`、`reco_user_profile`、`reco_user_seen` 和 `reco_article_daily_stat`。这些表分别记录用户行为事件、每次推荐返回的结果、用户画像、用户已看记录和文章每日统计。
+（2）文章、标签与文章反馈相关表
 
-第六类是聊天与审计表，包括 `chat_thread`、`chat_message` 和 `audit_log`。聊天线程表用于确定两个用户之间的会话，聊天消息表保存消息正文和阅读状态；审计日志表保存关键请求信息，便于管理员排查问题。
+文章表保存内容与审核状态；`article_tag` 保存用户主动添加的标签，`article_tag_on_article` 保存文章与用户标签之间的关系；reaction 表保存 Emoji 反馈。
 
-在逻辑约束上，系统为邮箱、用户名、关注关系、reaction、聊天线程等字段设置唯一约束，避免重复数据。对于文章列表、推荐事件、通知和审计日志等高频查询数据，系统按用户、文章、状态、请求 ID 和创建时间建立索引，提高查询效率。
+表 3-2 文章、标签与文章反馈相关表
+
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| article | id | int(11) | 文章id |
+| article | authorId | int(11) | 作者用户id |
+| article | content | longtext | 文章内容 |
+| article | tag | varchar(191) | 用户标签文本 |
+| article | status | varchar(32) | 文章状态 |
+| article | reviewDecision、riskLevel | varchar(32) | 审核结果、风险等级 |
+| article | reviewReason、reviewSuggestion | varchar(512) | 审核原因、审核建议 |
+| article | posttime、reviewedAt | datetime(3) | 发布时间、审核时间 |
+| article_tag | id | int(11) | 用户标签id |
+| article_tag | name | varchar(191) | 标签名 |
+| article_tag | createdAt | datetime(3) | 创建时间 |
+| article_tag_on_article | articleId、tagId | int(11) | 文章id、用户标签id |
+| article_tag_on_article | weight | float | 标签权重 |
+| article_tag_on_article | createdAt | datetime(3) | 创建时间 |
+| article_reaction | id | int(11) | 文章反馈id |
+| article_reaction | articleId、userId | int(11) | 文章id、用户id |
+| article_reaction | emoji | varchar(191) | Emoji内容 |
+| article_reaction | createdAt | datetime(3) | 反馈时间 |
+
+（3）评论与评论反馈相关表
+
+评论表保存文章评论和评论回复，评论 Emoji 表保存用户对评论的反馈。
+
+表 3-3 评论与评论反馈相关表
+
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| comment | id | int(11) | 评论id |
+| comment | content | longtext | 评论内容 |
+| comment | posttime | datetime(3) | 评论时间 |
+| comment | userId、articleId | int(11) | 用户id、文章id |
+| comment | parentId、replyToUserId | int(11) | 父评论id、被回复用户id |
+| comment | status | varchar(191) | 评论状态 |
+| comment_reaction | id | int(11) | 评论反馈id |
+| comment_reaction | commentId、userId | int(11) | 评论id、用户id |
+| comment_reaction | emoji | varchar(191) | Emoji内容 |
+| comment_reaction | createdAt | datetime(3) | 反馈时间 |
+
+（4）社交关系与通知相关表
+
+关注表保存用户之间的关注关系，通知表保存审核结果和互动反馈。
+
+表 3-4 社交关系与通知相关表
+
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| follow | id | int(11) | 关注id |
+| follow | followerId、followingId | int(11) | 关注者id、被关注者id |
+| follow | status | enum('ACTIVE','BLOCKED','REMOVED') | 关注状态 |
+| follow | createdAt、updatedAt | datetime(3) | 创建时间、更新时间 |
+| notification | id | bigint(20) | 通知id |
+| notification | userId、actorId | int(11) | 接收用户id、触发用户id |
+| notification | type | varchar(64) | 通知类型 |
+| notification | title | varchar(191) | 通知标题 |
+| notification | body | varchar(512) | 通知内容 |
+| notification | articleId、commentId | int(11) | 文章id、评论id |
+| notification | link | varchar(512) | 跳转链接 |
+| notification | readAt、createdAt | datetime(3) | 已读时间、创建时间 |
+
+（5）AI 分析相关表
+
+AI 分析表保存文章评分；AI 标签表保存从预设标签库中匹配出的标签；AI 标签关联表保存文章与分析标签之间的置信度和权重。
+
+表 3-5 AI 分析相关表
+
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| article_ai_analysis | id | int(11) | AI分析id |
+| article_ai_analysis | articleId | int(11) | 文章id |
+| article_ai_analysis | friendlinessScore | int(11) | 友好度分 |
+| article_ai_analysis | rationalityScore | int(11) | 理性度分 |
+| article_ai_analysis | legalityScore | int(11) | 合法性分 |
+| article_ai_analysis | professionalismScore | int(11) | 专业度分 |
+| article_ai_analysis | analyzedAt | datetime(3) | 分析时间 |
+| article_ai_tag | id | int(11) | AI标签id |
+| article_ai_tag | name | varchar(191) | 标签名 |
+| article_ai_tag_on_article | articleId、tagId | int(11) | 文章id、AI标签id |
+| article_ai_tag_on_article | confidence | float | 匹配置信度 |
+| article_ai_tag_on_article | weight | float | 标签权重 |
+| article_ai_tag_on_article | createdAt | datetime(3) | 创建时间 |
+
+（6）推荐相关表
+
+推荐相关表保存用户行为、推荐请求、用户画像、已看记录和文章每日统计。
+
+表 3-6 推荐相关表
+
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| reco_event | id | int(11) | 推荐事件id |
+| reco_event | userId、articleId | int(11) | 用户id、文章id |
+| reco_event | eventType | enum | 事件类型 |
+| reco_event | dwellMs、position | int(11) | 停留时长、展示位置 |
+| reco_event | scene、requestId、sessionId | varchar(191) | 推荐场景、请求id、会话id |
+| reco_event | createdAt | datetime(3) | 创建时间 |
+| reco_request_log | requestId | varchar(191) | 请求id |
+| reco_request_log | scene | varchar(191) | 推荐场景 |
+| reco_request_log | candidateCount | int(11) | 候选数量 |
+| reco_request_log | resultIds | json | 结果文章id列表 |
+| reco_user_profile | userId | int(11) | 用户id |
+| reco_user_profile | tagVector | json | 兴趣标签 |
+| reco_user_profile | authorAffinity | json | 作者偏好 |
+| reco_user_seen | userId、articleId | int(11) | 用户id、文章id |
+| reco_user_seen | seenCount | int(11) | 已看次数 |
+| reco_user_seen | lastSeenAt | datetime(3) | 最近看到时间 |
+| reco_article_daily_stat | articleId、statDate | int(11)、date | 文章id、统计日期 |
+| reco_article_daily_stat | impressions、clicks、likes、comments、reports | int(11) | 曝光数、点击数、点赞数、评论数、举报数 |
+| reco_article_daily_stat | dwellMsSum | bigint(20) | 停留时长 |
+| reco_article_daily_stat | qualityScore | double | 质量分 |
+
+（7）聊天相关表
+
+聊天线程表保存一对一会话，聊天消息表保存具体私信内容。
+
+表 3-7 聊天相关表
+
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| chat_thread | id | int(11) | 会话id |
+| chat_thread | userAId、userBId | int(11) | 会话用户id |
+| chat_thread | createdAt | datetime(3) | 创建时间 |
+| chat_message | id | int(11) | 消息id |
+| chat_message | threadId、senderId | int(11) | 会话id、发送用户id |
+| chat_message | content | longtext | 消息内容 |
+| chat_message | createdAt | datetime(3) | 发送时间 |
+
+（8）审计日志表
+
+审计日志表保存关键请求和操作结果，便于管理员按请求路径、请求 id 和操作结果排查问题。
+
+表 3-8 审计日志表
+
+| 表名 | 列名 | 类型 | 注释 |
+| --- | --- | --- | --- |
+| audit_log | id | bigint(20) | 日志id |
+| audit_log | requestId | varchar(128) | 请求id |
+| audit_log | userId、username、role | int(11)、varchar(128)、varchar(32) | 用户id、用户名、用户角色 |
+| audit_log | ipAddress | varchar(64) | IP地址 |
+| audit_log | method | varchar(16) | 请求方法 |
+| audit_log | route | varchar(512) | 请求路径 |
+| audit_log | action | varchar(128) | 操作类型 |
+| audit_log | result | varchar(16) | 操作结果 |
+| audit_log | statusCode | int(11) | 状态码 |
+| audit_log | detail | varchar(1024) | 详细信息 |
+| audit_log | createdAt | datetime(3) | 创建时间 |
+
 
 #### 3.2.3 数据库物理结构设计
 
-物理结构上，本系统使用 MySQL 存储数据，并通过 Prisma schema 描述表结构。文章正文使用 `LongText` 类型保存，原因是社交平台中的文本长度不固定；通知内容、审核原因和审核建议使用 `VarChar` 控制长度，避免字段过大。推荐画像和推荐结果列表属于半结构化数据，使用 JSON 字段保存较为方便。
+物理结构设计关注数据库在具体 DBMS 中的落地方式，包括字段类型、主键生成方式、索引、字符集和高频写入策略。本系统使用 MySQL 作为关系型数据库，通过 Prisma schema 描述主要表结构，并在必要位置使用迁移脚本补充通知等运行期表结构。
 
-在实际运行中，文章列表、推荐流、通知中心和审计查询访问频率较高。因此，文章表围绕作者、状态和发布时间建立索引；推荐事件表围绕用户、文章、事件类型和请求 ID 建立索引；通知表围绕用户和已读状态建立索引；审计日志表围绕请求 ID、用户 ID、结果和创建时间建立索引。通过这些索引，系统可以更快地查询公开信息流、未读通知、用户画像来源和失败请求记录。
+字段类型方面，用户 ID、文章 ID、评论 ID 等业务主键主要使用自增整数；审计日志和通知数据增长较快，主键使用更大的整数范围。文章正文、评论正文和聊天消息正文长度不固定，因此使用 `LongText` 保存。角色、状态、审核决策、风险等级、请求方法和操作结果等枚举型文本使用较短的 `VarChar` 保存。审核原因、审核建议、通知正文和审计详情使用限定长度的 `VarChar`，避免单条记录过大。用户画像中的标签向量、作者亲和度和推荐返回 ID 列表属于半结构化数据，使用 JSON 字段保存更灵活。
+
+约束与完整性方面，用户名、邮箱、刷新令牌哈希、关注关系、文章 Emoji、评论 Emoji 和聊天线程均设置唯一约束，防止重复数据。文章与 AI 分析之间通过 `articleId` 唯一约束保证一篇文章只有一条当前分析结果；文章标签、AI 标签、已看记录和文章每日统计使用复合主键保存关联关系。刷新令牌与用户之间设置级联删除，用户被删除后相关会话令牌也会失效；文章删除时，服务层通过事务清理评论、reaction、标签关联和 AI 分析记录，保证业务完整性。
+
+索引设计方面，文章列表和推荐流经常按作者、状态和发布时间查询，因此文章表围绕 `authorId`、`status` 和 `posttime` 建立索引。推荐事件表围绕用户、文章、事件类型、请求 ID 和创建时间建立索引，便于计算画像和追踪一次推荐请求。通知表围绕接收用户、通知类型和阅读状态建立索引，便于通知中心快速筛选未读消息。审计日志表围绕请求 ID、用户 ID、结果和创建时间建立索引，便于管理员按照请求链路或失败状态排查问题。
+
+并发写入方面，推荐流属于系统中写入频率较高的路径。曝光事件会更新已看记录，点击、阅读完成、评论和举报等行为会影响文章日统计和用户画像。为了避免并发请求首次写入同一主键时产生冲突，`reco_user_seen`、`reco_user_profile` 和 `reco_article_daily_stat` 等高频表在服务实现中使用 MySQL 原子 `INSERT ... ON DUPLICATE KEY UPDATE` 语句进行更新，使推荐请求在并发情况下仍能稳定累计数据。
 
 ### 3.3 系统架构设计
 
@@ -210,7 +378,7 @@
 
 当前各服务共用同一个 MySQL 数据库，便于开发、测试和答辩演示；但代码层面已经按照服务职责拆分，后续可以进一步演进为独立数据库或独立部署的服务。
 
-> 图 3-5 插入位置：系统微服务架构图。Mermaid 源文件：[microservice-runtime.mmd](../diagrams/system/microservice-runtime.mmd)
+> 图 3-10 插入位置：系统微服务架构图。Mermaid 源文件：[microservice-runtime.mmd](../diagrams/system/microservice-runtime.mmd)
 
 ## 第 4 章 系统详细设计及实现
 
@@ -224,11 +392,11 @@ access token 用于短时间内识别用户身份，refresh token 用于延长�
 
 从代码实现看，注册入口位于 `user_service/src/controllers/authController.ts`。控制器先调用 `assertUsername`、`assertEmail` 和 `assertPassword` 做输入校验，再进入 `authService.registerUser`。服务层使用 `bcrypt.hash` 保存密码哈希，并通过 `prisma.user.findFirst` 检查用户名或邮箱是否重复。登录成功后，`issueTokens` 负责生成 JWT access token、refresh token 和 CSRF token，其中 refresh token 会经过 SHA-256 哈希后写入 `auth_refresh_token` 表。刷新会话时，`refreshTokens` 使用数据库事务撤销旧 token 并创建新 token，避免旧刷新令牌长期有效。
 
-> 图 4-1 插入位置：用户认证流程图。Mermaid 源文件：[auth-flow.mmd](../diagrams/modules/auth-flow.mmd)
+> 图 4-1 插入位置：注册、登录与登录后导航状态实际页面截图。
 
 #### 4.1.2 角色权限与接口访问管理
 
-平台通过登录校验逻辑识别当前用户，再根据用户角色控制敏感接口访问。普通用户可以发布内容、评论、关注、聊天和查看自己的通知；审核员或管理员可以访问 AI 分析接口、审计日志和管理员摘要等功能。对于删除文章、删除评论、查看聊天线程等操作，平台还会检查资源归属，防止用户操作不属于自己的数据。
+平台通过登录校验逻辑识别当前用户，再根据用户角色控制敏感接口访问。普通用户可以发布内容、评论、关注、聊天和查看自己的通知；管理员可以访问 AI 分析接口、审计日志和管理员摘要等功能。对于删除文章、删除评论、查看聊天线程等操作，平台还会检查资源归属，防止用户操作不属于自己的数据。
 
 权限边界主要由 `requireAuth` 和 `requireRole` 中间件实现。`requireAuth` 从 Bearer token 或 Cookie 中取出 access token，校验后把用户 id、用户名和角色挂载到 `req.auth`。需要管理员能力的接口再叠加 `requireRole`。公开注册路径不接收客户端提交的角色字段，并在 `authService.registerUser` 中固定写入 `role=user`；角色变更只保留在受保护的管理员接口中，从而把“注册身份”和“管理授权”分开处理。
 
@@ -248,9 +416,9 @@ access token 用于短时间内识别用户身份，refresh token 用于延长�
 
 公开列表、关注流和推荐流只展示 `PUBLISHED` 和 `LOW_PRIORITY` 内容。复核、拒绝和待审核内容不会进入公开信息流。作者本人可以查看自己的非公开内容详情，并通过通知中心获得处理结果。
 
-文章可见性由 `isPublicArticleStatus` 和 `canViewArticle` 两层判断完成。列表和推荐候选只加载公开状态内容；详情接口则允许作者本人、审核员和管理员查看非公开内容。这个实现使“公开展示”和“作者查看处理结果”可以同时存在，不会因为文章暂未公开就让作者无法确认审核反馈。
+文章可见性由 `isPublicArticleStatus` 和 `canViewArticle` 两层判断完成。列表和推荐候选只加载公开状态内容；详情接口则允许作者本人和管理员查看非公开内容。这个实现使“公开展示”和“作者查看处理结果”可以同时存在，不会因为文章暂未公开就让作者无法确认审核反馈。
 
-> 图 4-2 插入位置：内容发布与审核状态流图。Mermaid 源文件：[content-review-flow.mmd](../diagrams/modules/content-review-flow.mmd)
+> 图 4-2 插入位置：文章发布编辑器、标签输入与审核反馈实际页面截图。
 
 ### 4.3 用户社交关系与互动功能
 
@@ -268,7 +436,7 @@ access token 用于短时间内识别用户身份，refresh token 用于延长�
 
 评论创建由 `commentService.createComment` 完成，服务会先确认文章处于公开状态，再写入评论或回复关系。Reaction 使用“切换”逻辑：`reactionService.toggleArticleReaction` 和 `toggleCommentReaction` 会先查找同一用户、同一对象、同一 emoji 是否已存在，存在则删除，不存在则创建。私信聊天由 `chatService.getOrCreateThread` 和 `createMessage` 实现，两个用户 id 会先排序后写入复合唯一线程，WebSocket 收到 `send_message` 后也复用同一套 `createMessage` 写库逻辑，再向双方在线连接广播 `message_created`。
 
-> 图 4-3 插入位置：社交互动与通知 ER 图。Mermaid 源文件：[social-notification-er.mmd](../diagrams/modules/social-notification-er.mmd)
+> 图 4-3 插入位置：文章详情页评论、Emoji 互动与私信入口实际页面截图。
 
 ### 4.4 消息通知与处理结果反馈功能
 
@@ -278,7 +446,7 @@ access token 用于短时间内识别用户身份，refresh token 用于延长�
 
 通知写入统一经过 `notificationService.createNotification`。该函数会先调用 `ensureNotificationStore` 确保通知表存在，再插入通知记录；如果 `actorId` 与接收人相同，则直接返回，不生成自触发通知。审核反馈由 `notifyArticleReviewResult` 根据文章状态映射通知类型，评论、reaction 和关注分别由 `notifyCommentCreated`、`notifyArticleReaction`、`notifyCommentReaction` 和 `notifyFollowed` 生成。已读操作使用 `COALESCE(readAt, CURRENT_TIMESTAMP(3))`，重复标记不会改变第一次阅读时间。
 
-> 图 4-4 插入位置：评论、Emoji 与通知流程图。Mermaid 源文件：[social-feedback-flow.mmd](../diagrams/modules/social-feedback-flow.mmd)
+> 图 4-4 插入位置：通知中心列表、未读状态与通知类型筛选实际页面截图。
 
 ### 4.5 基于 AI 分析的内容评分功能
 
@@ -286,7 +454,7 @@ access token 用于短时间内识别用户身份，refresh token 用于延长�
 
 AI 内容评分由 `ai_service` 实现。文章创建后，`blog_service` 使用内部服务 token 调用 AI 服务，避免普通用户直接访问内部分析接口。AI 服务读取文章内容后，通过 provider 调用 mock 模型或外部大模型接口。开发和测试环境可以使用 mock provider，保证分析结果稳定；生产环境可以切换到 OpenAI-compatible provider。
 
-AI 分析接口受到权限保护，只有审核员、管理员或内部服务请求可以调用。如果模型调用失败，平台会返回较保守的复核结果，使文章进入复核状态，避免未审核内容直接公开。
+AI 分析接口受到权限保护，只有管理员或内部服务请求可以调用。如果模型调用失败，平台会返回较保守的复核结果，使文章进入复核状态，避免未审核内容直接公开。
 
 AI 服务通过 `createProvider` 选择 provider。测试环境使用 `AI_PROVIDER=mock`，可以保证相同文本得到稳定结果；正式环境可切换到 OpenAI-compatible provider。`analysisService.analyzeText` 会把正文和压缩后的标签体系交给 provider，如果 provider 抛出异常，则返回 `fallbackResult`，其中风险等级为 `HIGH`、决策为 `REVIEW`，使文章进入复核流程。
 
@@ -296,7 +464,7 @@ AI 服务从友好度、理性度、合法性和专业度四个角度对文章�
 
 持久化逻辑位于 `persistArticleAnalysis`。它对 `article_ai_analysis` 做 upsert，保证同一篇文章只有一条当前分析记录；AI 标签先按名称去重，再写入 `article_ai_tag` 和 `article_ai_tag_on_article`，同时清理本次未返回的旧标签。随后 `statusFromDecision` 将 `ALLOW`、`LOW_PRIORITY`、`REVIEW`、`REJECT` 映射到文章状态，并调用 `refreshUserRating` 更新作者在 `user` 表中的专业度和友好度。
 
-> 图 4-5 插入位置：AI 内容评分 ER 图。Mermaid 源文件：[ai-rating-er.mmd](../diagrams/modules/ai-rating-er.mmd)
+> 图 4-5 插入位置：文章 AI 评分结果、审核状态和处理建议实际页面截图。
 
 ### 4.6 用户综合行为评分功能
 
@@ -315,6 +483,8 @@ AI 服务从友好度、理性度、合法性和专业度四个角度对文章�
 用户主页展示综合等级、综合分、内容质量分、合规分、反馈分和风险信号。风险信号用于说明评分来源，例如低优先级内容数量、复核内容数量、举报次数等。
 
 综合分采用加权计算：内容质量分占 55%，合规分占 25%，互动反馈分占 20%。合规分从 100 分起扣，低优先级、复核、拒绝和举报的扣分逐步加重；互动反馈分从 50 分起算，正向反馈和完整阅读加分，隐藏和举报扣分。最后通过 `levelFromScore` 映射为 A、B、C、D 四档，并由 `buildRatingSignals` 生成可读的风险说明。
+
+> 图 4-6 插入位置：用户主页个人资料、综合评分和风险信号实际页面截图。
 
 ### 4.7 基于评分结果的推荐与展示功能
 
@@ -355,9 +525,9 @@ AI 服务从友好度、理性度、合法性和专业度四个角度对文章�
 
 推荐事件写入由 `recoEventService.recordRecoEvent` 统一处理。该函数会先确认文章仍属于公开状态，再写入事件记录。曝光事件会更新已看次数；点击、停留、阅读完成、点赞、评论、收藏、关注作者、隐藏和举报等强行为会触发用户画像刷新。高并发测试中曾发现已看记录、用户画像和文章日统计在首次并发写入时可能出现主键冲突，因此这些高频写入已经改为 MySQL 原子 `INSERT ... ON DUPLICATE KEY UPDATE`，以保证并发请求下仍能正确累计数据。
 
-> 图 4-6 插入位置：推荐画像 ER 图。Mermaid 源文件：[recommendation-er.mmd](../diagrams/modules/recommendation-er.mmd)
+> 图 4-7 插入位置：推荐页面文章列表与推荐排序展示实际页面截图。
 
-> 图 4-7 插入位置：推荐展示与行为反馈流程图。Mermaid 源文件：[recommendation-flow.mmd](../diagrams/modules/recommendation-flow.mmd)
+> 图 4-8 插入位置：推荐页用户画像可视化面板与兴趣气泡实际页面截图。
 
 ### 4.8 安全日志记录与审计模块
 
@@ -373,11 +543,11 @@ AI 服务从友好度、理性度、合法性和专业度四个角度对文章�
 
 API 网关提供健康检查、路由列表、路由指标、审计日志查询和管理员摘要接口。健康检查会访问各上游服务的 `/health` 接口，并汇总服务状态。路由指标记录请求次数、错误次数、请求方法、最后状态码和延迟。管理员摘要会统计最近一段时间内的成功率、失败率、热点接口和失败请求。
 
-运维页面 `/ops` 展示网关健康、路由指标、审计日志和 AI 分析查询结果。普通用户不能访问审计数据，只有管理员或审核员角色可以查看。
+运维页面 `/ops` 展示网关健康、路由指标、审计日志和 AI 分析查询结果。普通用户不能访问审计数据，只有管理员角色可以查看。
 
-网关状态由 `api_gateway/src/gatewayStatus.ts` 提供。`collectGatewayMetrics` 在响应结束时记录路由请求数、错误数、最后状态码和延迟；`gatewayHealthController` 会访问各上游服务的 `/health` 并汇总为 `ok`、`degraded` 或 `down`。审计查询和管理员摘要会先解析 access token，并只允许 `reviewer` 或 `admin` 角色访问。WebSocket 升级也放在网关层处理，目前只有 chat 路由配置了 `supportsWebSocket`，避免普通 HTTP 代理错误接管升级连接。
+网关状态由 `api_gateway/src/gatewayStatus.ts` 提供。`collectGatewayMetrics` 在响应结束时记录路由请求数、错误数、最后状态码和延迟；`gatewayHealthController` 会访问各上游服务的 `/health` 并汇总为 `ok`、`degraded` 或 `down`。审计查询和管理员摘要会先解析 access token，并只允许 `admin` 角色访问。WebSocket 升级也放在网关层处理，目前只有 chat 路由配置了 `supportsWebSocket`，避免普通 HTTP 代理错误接管升级连接。
 
-> 图 4-8 插入位置：审计监控流程图。Mermaid 源文件：[audit-flow.mmd](../diagrams/modules/audit-flow.mmd)
+> 图 4-9 插入位置：运维页面服务健康、路由指标和审计日志实际页面截图。
 
 ## 第 5 章 系统测试
 

@@ -40,7 +40,7 @@ if (req.body?.role !== undefined) {
 
 会话刷新由 `refreshTokens` 实现。它先根据 refresh token 哈希查找记录，再检查是否已撤销、是否过期，以及 CSRF token 是否匹配。校验通过后使用事务同时撤销旧 token、创建新 token，实现 refresh token rotation。退出登录时，`revokeRefreshToken` 会把当前 refresh token 标记为已撤销。
 
-受保护接口通过 `requireAuth` 和 `requireRole` 实现。中间件会从 `Authorization: Bearer` 或 Cookie 中提取 access token，调用 `getUserByAccessToken` 校验 JWT，并把用户信息挂到 `req.auth`。需要管理员或审核员权限的接口再叠加 `requireRole`，例如角色修改、AI 管理和审计查询。
+受保护接口通过 `requireAuth` 和 `requireRole` 实现。中间件会从 `Authorization: Bearer` 或 Cookie 中提取 access token，调用 `getUserByAccessToken` 校验 JWT，并把用户信息挂到 `req.auth`。需要管理员权限的接口再叠加 `requireRole`，例如角色修改、AI 管理和审计查询。
 
 用户评分查询虽然由用户服务暴露，但它跨表读取文章、AI 分析和推荐事件。`userService.getUserRating` 使用 SQL 聚合计算内容质量、合规情况和互动反馈，再返回综合分、等级和风险信号。这使用户主页展示不只依赖静态字段，而是反映近期内容和互动表现。
 
@@ -69,5 +69,5 @@ if (req.body?.role !== undefined) {
 - refresh token 只保存哈希，并支持撤销与轮换。
 - 支持 Bearer token 和 Cookie 两种身份携带方式。
 - 通过 `requireAuth` 和 `requireRole` 保护接口。
-- 公共注册接口不能创建管理员或审核员角色。
+- 公共注册接口不能创建管理员角色。
 - 用户综合评分接口可结合 AI 评分、审核状态和互动反馈输出等级。

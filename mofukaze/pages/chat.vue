@@ -67,10 +67,10 @@
         <div v-if="!activeThread" class="empty">选择或创建一个会话</div>
         <template v-else>
           <div class="row chat-title">
-            <span class="avatar">
+            <NuxtLink class="avatar chat-peer-avatar" :to="`/u/${activeThread.counterpart.id}`" title="查看用户主页">
               <img v-if="avatarUrl(activeThread.counterpart.avatar)" :src="avatarUrl(activeThread.counterpart.avatar)" alt="" />
               <span v-else>{{ activeThread.counterpart.username.slice(0, 1).toUpperCase() }}</span>
-            </span>
+            </NuxtLink>
             <div>
               <h3 style="margin: 0">{{ activeThread.counterpart.username }}</h3>
               <p class="muted" style="margin: 2px 0 0">{{ socketStatusText }}</p>

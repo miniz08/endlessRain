@@ -1,70 +1,18 @@
-erDiagram
-  USER ||--o{ ARTICLE : publishes
-  ARTICLE ||--o{ COMMENT : has
-  ARTICLE ||--o{ ARTICLE_TAG_ON_ARTICLE : tagged_by
-  ARTICLE_TAG ||--o{ ARTICLE_TAG_ON_ARTICLE : maps
-  ARTICLE ||--|| ARTICLE_AI_ANALYSIS : analyzed_as
-  ARTICLE ||--o{ ARTICLE_AI_TAG_ON_ARTICLE : classified_as
-  ARTICLE_AI_TAG ||--o{ ARTICLE_AI_TAG_ON_ARTICLE : maps
+flowchart LR
+  USER["用户"]
+  ARTICLE["文章"]
+  COMMENT["评论"]
+  ARTICLE_TAG["用户标签"]
+  ARTICLE_TAG_REL["文章-用户标签"]
+  ARTICLE_REACTION["文章 Emoji"]
+  COMMENT_REACTION["评论 Emoji"]
 
-  USER {
-    int id PK
-    varchar username
-    varchar role
-  }
-
-  ARTICLE {
-    int id PK
-    longtext content
-    varchar tag
-    varchar status
-    varchar reviewDecision
-    varchar riskLevel
-    varchar reviewReason
-    varchar reviewSuggestion
-    datetime reviewedAt
-    datetime posttime
-    int authorId FK
-  }
-
-  COMMENT {
-    int id PK
-    longtext content
-    datetime posttime
-    int userId FK
-    int articleId FK
-    varchar status
-  }
-
-  ARTICLE_TAG {
-    int id PK
-    varchar name UK
-  }
-
-  ARTICLE_TAG_ON_ARTICLE {
-    int articleId PK
-    int tagId PK
-    float weight
-  }
-
-  ARTICLE_AI_ANALYSIS {
-    int id PK
-    int articleId UK
-    int friendlinessScore
-    int rationalityScore
-    int legalityScore
-    int professionalismScore
-  }
-
-  ARTICLE_AI_TAG {
-    int id PK
-    varchar name UK
-  }
-
-  ARTICLE_AI_TAG_ON_ARTICLE {
-    int articleId PK
-    int tagId PK
-    float confidence
-    float weight
-  }
-
+  USER -->|"发布"| ARTICLE
+  ARTICLE -->|"承载"| COMMENT
+  COMMENT -->|"回复"| COMMENT
+  ARTICLE -->|"关联"| ARTICLE_TAG_REL
+  ARTICLE_TAG -->|"映射"| ARTICLE_TAG_REL
+  USER -->|"反馈"| ARTICLE_REACTION
+  ARTICLE -->|"获得"| ARTICLE_REACTION
+  USER -->|"反馈"| COMMENT_REACTION
+  COMMENT -->|"获得"| COMMENT_REACTION

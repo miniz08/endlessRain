@@ -1,0 +1,288 @@
+4 MATERIALS AND METHODS
+We studied the effect of automatically enforcing community guide-
+lines with two quasi-experiments (Fig. 3). Apost is a piece of content
+posted on Facebook, a comment is a response to that piece of con-
+tent, and a thread comprises comments associated with a post.
+Data. For both quasi-experiments, we used a dataset of public com-
+ments and posts posted by adult U.S. users in English between June
+1st and August 31st, 2022. This comprised 412 million comments
+made in 1.5 million posts by 1.3 million distinct users. All data was
+2https://transparency.fb.com/policies/community-standards/violence-incitement/.
+3https://transparency.fb.com/features/approach-to-ranking/types-of-content-we-
+demote
+
+Horta Ribeiro et al.
+Table 1: Outcomes considered in this study.
+Outcome Description
+Interventions in
+follow-up period
+The number of interventions that, in
+the follow-up period, targeted either the
+comments made by the user (in the user-
+level scenario) or the subsequent com-
+ments in the thread (in the thread-level
+scenario).
+Comments The number of comments made during
+the follow-up period. In the user-level
+scenario, we also include posts.
+de-identified and analyzed in aggregate, and no individual-level
+data was viewed by the researchers.
+Thread level. In this first scenario (Fig. 3a), we studied the im-
+pact of automatic moderation on the thread where comments were
+intervened upon. For each post in our data, we looked for the
+first comment 𝑐0 whose score was in the 5 percentage point range
+of either of the two thresholds where the “hide” and the “delete”
+interventions are applied, i.e., 𝑆 ∈ [ 𝑡hide − 0.05, 𝑡hide + 0.05] or
+𝑆 ∈ [ 𝑡delete − 0.05, 𝑡delete + 0.05]; recall that 𝑆 ∈ [ 0, 1]. (As described
+later, we reweight these data points based on their distance from
+𝑡hide or 𝑡delete.) If a thread had no comments that met the above
+criteria, it was excluded from this analysis. For each comment 𝑐0
+selected this way, we considered all comments made before (in the
+pre-assignment period) and after𝑐0 in the same thread (in thefollow-
+up period). After computing the outcome measures using data from
+the follow-up period, we used fuzzy regression discontinuity (see
+Sec. 4) to determine the effect of hiding or deleting the comment. To
+study effect heterogeneity, we considered four different setups in
+this quasi-experiment, varying (1) whether we included other com-
+ments from the author of the selected comment𝑐0 when calculating
+the outcomes of interest in the follow-up period; and (2) whether
+we considered threads that had more than20 comments. We choose
+20 as a cutoff point as it induces an 80/20 split, i.e., around 80%
+of the threads have less than 20 comments. A 75/25 or 85/15 split
+yielded qualitatively similar results.
+User level. In the second scenario (Fig. 3b), we studied the impact
+of automatic moderation on the users whose comments were in-
+tervened upon. For each user 𝑢 in our data, we looked for the first
+comment in the study period 𝑐0 whose score was in the 5 percent-
+age point range of the “hide” and “delete” thresholds. If a user had
+no comments meeting the above criteria, they were excluded from
+this analysis. For each user/comment tuple (𝑢0, 𝑐0) selected this
+way, we additionally considered all comments the user 𝑢0 made in
+the 𝑘 days before (in the pre-assignment period) and after posting 𝑐0
+(in the follow-up period). Again, data from the follow-up period was
+used to calculate outcomes, and a fuzzy regression discontinuity
+design was used to determine the effect of the interventions. We
+studied the heterogeneity of the effect of these interventions in
+two ways. First, we varied the value of 𝑘, the number of days in
+the follow-up period (we considered 𝑘 ∈ { 7, 14, 21, 28}). Second, we
+separately considered (1) users who had not violated community
+... 
+Pre-assignment period
+t
+User C
+User B
+User A
+User C
+0
+Follow-up period
+User A
+(a) Thread-level scenario
+User A
+t
+0
+User AUser A
+User A
+User A
+Pre-assignment period Follow-up period
+*
+(b) User-level scenario
+Figure 3: The study approximates a real experiment where
+comments were intervened upon at random using observa-
+tional data using a fuzzy regression discontinuity design. We
+depict the thread-level and user-level scenarios in (a) and (b)
+and describe them in Sec. 4. In (b), the asterisk denotes the
+setup where users are suspended, and the suspension period
+is not considered when calculating the outcomes.
+guidelines recently and only received a warning after having their
+comment deleted; and (2) users who had violated community guide-
+lines once in the recent past and were thus suspended from posting
+on Facebook for a day after their comment was deleted.4
+Outcomes. The outcomes considered in this study are shown in
+Table 1. One outcome is associated with subsequent rule-breaking
+behavior (interventions), while one is associated with subsequent
+activity on the platform (comments).
+Regression Discontinuity Designs.Regression discontinuity (RD)
+is a quasi-experimental study design that has been widely used
+in the social sciences since the 1990s [ 22]. Here, we provide an
+overview of the fuzzy regression discontinuity design (an exten-
+sion of RD), explaining how we use it for the quasi-experiments
+described in Section 4 and illustrated in Fig. 3.
+Fuzzy Regression Discontinuity (FRD). Let each comment 𝑐 be
+assigned a score 𝑆𝑐 ∈ [ 0, 1], and 𝑋𝑐 be an indicator variable that
+equals 1 if the content has been intervened upon and 0 otherwise. If
+4https://transparency.fb.com/en-gb/enforcement/taking-action/restricting-
+accounts/
+
+Automated Content Moderation Increases Adherence to Community Guidelines
+the 𝑆 score is beyond a threshold 𝑡, the probability of that comment
+getting intervened upon increases sharply:
+𝑃 [𝑋𝑐 = 1 | 𝑆𝑐 ] =
+(
+𝑓1 (𝑆𝑐 ) if 𝑆𝑐 ≥ 𝑡
+𝑓0 (𝑆𝑐 ) if 𝑆𝑐 < 𝑡 where 𝑓1 (𝑎) > 𝑓0 (𝑎) ∀ 𝑎.
+(1)
+Note that this is a generalization of sharp regression discontinuity
+designs, where 𝑓0 (𝑆𝑐 ) = 0 and 𝑓1 (𝑆𝑐 ) = 1 , i.e. 𝑃 [𝑋𝑐 = 1 | 𝑆𝑐 ] jumps
+from 0 to 1 around the threshold. This is more suited to the scenario
+we are studying since mechanisms other than the classifier may
+come into play, e.g., comments may be removed due to user reports
+when the score is below the threshold (𝑆𝑐 < 𝑡), and other automated
+systems may prevent comments above the threshold from being
+removed when the score is above the threshold (𝑆𝑐 ≥ 𝑡). A directed
+acyclic graph (DAG) illustrating the causal relationship between
+the score, the treatment, and the outcomes we are interested in
+measuring is shown in Fig. 4a. The treatment 𝑋 is determined by
+the score 𝑆 given by the classifier and other factors unobserved in
+the present study (represented by 𝑈 ).
+The key insight of fuzzy regression discontinuity designs is to
+estimate the effect of the intervention 𝑋 on the outcome 𝑌 , even
+with unknown confounders 𝑈 , for comments with scores in the
+interval 𝑆𝑐 ∈ [ 𝑡 −𝜖, 𝑡 +𝜖], 𝜖 → 0. We assume that comments that lie
+right before or right after the threshold are indistinguishable, but
+those above the threshold are more likely to receive the treatment
+than those below. Thus, around the threshold, we can consider a
+new DAG where there is no arrow𝑈 → 𝑆, as shown in Fig. 4b. Here,
+𝑆 has a causal effect on 𝑌 only through 𝑋 , and thus we can use the
+same idea behind instrumental variable (IV) designs [3] to study
+the effect of 𝑋 on 𝑌 . In IV designs, we estimate the Local Average
+Treatment Effect (LATE), the treatment effect for the subset of the
+comments that take the treatment (i.e., 𝑋𝑐 = 1) if and only if they
+were “assigned” to the treatment (i.e.,𝑆𝑐 > 𝑡):
+𝐿𝐴𝑇 𝐸 = 𝐼𝑇𝑇
+𝐼𝑇𝑇𝑑
+, (2)
+where ITT is the average effect of assigning comments to the treat-
+ment group (regardless of them being treated), and 𝐼𝑇𝑇𝑑 is the
+proportion of subjects treated when assigned to the treated group.
+S X Y
+U
+(a)
+S X Y
+U
+(b)
+Figure 4: Causal Directed Acyclic Graphs (DAGs) illustrat-
+ing the fuzzy regression discontinuity design. 𝑆 is the score
+attributed to a comment, 𝑋 is an indicator variable repre-
+senting whether the comment was intervened upon, 𝑈 are
+unmeasured confounders, and 𝑌 is the outcome of interest.
+While estimating the effect of 𝑋 on 𝑌 is not possible in (a),
+around a specific threshold 𝑡 where there is a discontinuity
+around the probability of treatment ( 𝑃 [𝑋 = 1|𝑆]), we can re-
+move the arrow 𝑈 → 𝑋 [see (b)] and use the same idea be-
+hind instrumental variable designs to measure the effect of
+𝑋 on 𝑌 (see main text).
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+X: Delete
+E[X|S]
+ITTd
+-5% -2.5% t +2.5% +5%
+Score S
+0.25
+0.30
+0.35
+Y: Interventions
+E[Y|S]
+ITT
+Figure 5: A real example of our fuzzy regression disconti-
+nuity approach, considering the output of the violence and
+incitement classifier as the running variable 𝑆, deletions as
+the treatment 𝑋 , and the number of interventions in a 7 day
+follow-up period as the outcome 𝑌 . We estimate the causal
+effect as the ratio between two discontinuities ( 𝐼𝑇𝑇 /𝐼𝑇𝑇𝑑 ).
+𝐼𝑇𝑇𝑑 (top figure) is the discontinuity in the treatment around
+the threshold 𝑡 (i.e., the probability of deletion), while 𝐼𝑇𝑇
+(bottom figure) is the discontinuity in the outcome of inter-
+est around the same threshold (i.e., the number of interven-
+tions in a 7-day follow-up period).
+As 𝑆 is only an instrument close to the threshold 𝑡, we estimate the
+LATE at the cutoff point (LATEC), rewriting Equation (2) as:
+𝐿𝐴𝑇 𝐸𝐶 = 𝐸 [𝑌𝑐 | 𝑆𝑐 = 𝑡 + 𝜖] − 𝐸 [𝑌𝑐 | 𝑆𝑐 = 𝑡 − 𝜖]
+𝐸 [𝑋𝑐 | 𝑆𝑐 = 𝑡 + 𝜖] − 𝐸 [𝑋𝑐 | 𝑆𝑐 = 𝑡 − 𝜖] , 𝜖 → 0. (3)
+In practice, we can estimate the LATEC with 2-stage least squares
+regression, i.e., regressing the treatment 𝑋 on the score 𝑆 (first-
+stage), and then the outcome 𝑌 on the values ˆ𝑋 predicted on the
+first-stage (second-stage), see [2] for details. However, we do not
+have infinite data, and we cannot consider only comments with
+𝑆𝑐 ∈ [ 𝑡 − 𝜖, 𝑡 + 𝜖], 𝜖 → 0. This creates a bias–variance trade-off
+in the estimation of the LATEC. On the one hand, the wider the
+range we consider around the threshold𝑡, the more the unmeasured
+confounders can bias our estimator. On the other hand, the narrower
+the range, the less data we have, and thus the larger the variance
+of our estimator.
+A common solution to navigating this trade-off consists of using
+a local linear regression [18], where data points (here, comments)
+receive importance proportional to how far they are from the thresh-
+old, using a triangular weighting kernel defined as
+𝐾 (𝑆) = 1|𝑆−𝑡 |<ℎ
+
+1 − 𝑆 − 𝑡
+ℎ
+
+, (4)
+where ℎ is the bandwidth of the kernel that controls the bias–
+variance trade-off, and 1 |𝑆−𝑡 |<ℎ is an indicator variable that equals
+1 if |𝑆 − 𝑡 | < ℎ and 0 otherwise. We empirically determine the
+
+Horta Ribeiro et al.
+0.3
+ 0.2
+ 0.1
+ 0.0 0.1 0.2 0.3
+Standardized Effect
+Interventions
+in follow-up period
+Comments
+Outcome
+(a) Thread level
+> 20/Other
+> 20/All
+ 20/Other
+ 20/All
+0.3
+ 0.2
+ 0.1
+ 0.0 0.1 0.2 0.3
+Standardized Effect
+(b) User level: first offender
+7 days
+14 days
+21 days
+28 days
+0.3
+ 0.2
+ 0.1
+ 0.0 0.1 0.2 0.3
+Standardized Effect
+(c) User level: repeat offender
+7 days
+14 days
+21 days
+28 days
+Figure 6: We depict the estimated standardized effect of deleting comments at the thread (a) and user level (b and c). Error
+bars represent 95% CIs. We show that comment deletions can reduce subsequent activity (as measured by comments) and rule-
+breaking behavior (as measured by interventions in the follow-up period) across both (a) thread- and (b/c) user-level scenarios.
+bandwidth ℎ, choosing the bandwidth that yields the optimal mean
+squared error (MSE) of the LATEC estimator [21].
+Example. Fig. 5 illustrates our fuzzy regression discontinuity de-
+sign. It uses a random sample of users who did not previously vio-
+late community guidelines and examines interventions in a 7-day
+follow-up period following the first comment of interest (𝑐0). Fig-
+ure 5 (top) shows the percentage of first comments (𝑐0) that received
+the “Delete” treatment (i.e.𝐸 [𝑋 |𝑆]; in the𝑦-axis) for different scores
+received by first comments 𝑐0 (in the 𝑥-axis). Figure 5 (bottom) de-
+picts the outcome “Interventions in the follow-up period” (𝐸 [𝑌 |𝑆];
+in the 𝑦-axis) for different scores by first comments 𝑐0 (in the 𝑥-
+axis). Intuitively, the regression discontinuity design estimates the
+treatment effect of 𝑋 on 𝑌 around the threshold 𝑡delete by dividing
+the discontinuity in 𝐸 [𝑌 |𝑆] [corresponding to the numerator in
+Eq. (2) and Eq. (3)] by the discontinuity in 𝐸 [𝑋 |𝑆] [corresponding
+to the denominator in Eq. (2) and Eq. (3)].
+Robustness checks. To ensure the validity of our regression dis-
+continuity design, we additionally conduct several robustness checks
+suggested by guides outlining best practices [23, 32]. These robust-
+ness checks can be found in Appendix A.

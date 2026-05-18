@@ -1,0 +1,81 @@
+2 RELATED WORK
+Our investigation builds on two bodies of work – research on anti-
+social behavior and content moderation.
+Anti-social behavior. Anti-social behavior has been present on
+social media since its early days [11]. Given its detrimental effect on
+people’s lives [1, 13, 51], a vast body of research has characterized
+it across a variety of platforms, languages, and contexts [8, 47, 52].
+
+Automated Content Moderation Increases Adherence to Community Guidelines
+One line of work has used the growing capabilities of machine
+learning models to detect cyberbullying [ 36], hate speech [ 28],
+trolling [31], and online harassment [45]. Many commonly-used
+classifiers generate scores that are subsequently used to determine
+when intervention is appropriate. For example, Google Perspec-
+tive’s flagship classifier [27] outputs a “toxicity” score for short
+texts that reflects “rude, disrespectful or unreasonable comments
+that are likely to make someone leave a discussion. ” This score has
+been used to proactively intervene upon potentially rule-breaking
+content, for instance, on Coral, an open-source commenting plat-
+form used in over 100 newsrooms, including the Washington Post
+and Der Spieger [10]. But while classifiers for detecting undesirable
+behavior exist, less research focuses on understanding their impact.
+For instance, previous work has highlighted how such systems may
+struggle with context and differences in dialects [37, 40].
+Another line of research relevant to the present work has exam-
+ined whether anti-social behavior is “contagious, ” i.e., studying a
+user’s likelihood to produce trolling or uncivil content after being
+exposed to similar content. Findings have been mixed: some papers
+have found that rule-breaking behavior can spread from comment
+to comment [8, 29], while others have found null results [19, 39].
+Content moderation. A majority of prior work on content mod-
+eration has examined how it occurs at the community level, where
+members of the community enact sanctions (e.g., elected “adminis-
+trators” on Wikipedia [4]), rather than at the platform level, where
+centralized agents shape moderation decisions [41]. This prior work
+has focused on describing content moderation practices and gover-
+nance systems in online communities either quantitatively [6, 9, 12]
+or qualitatively [4, 14, 24]. For instance, research characterizing
+rule-breaking behavior on Reddit found that some norms were
+universal while others were unique to specific subreddits [6].
+More aligned with the work at hand is research evaluating the
+effects of content moderation at both the community and platform
+levels. At the community level, past research has measured the
+effectiveness of removing content on Reddit [44] or providing ex-
+planations for removals [26], finding that both reduced subsequent
+rule-breaking behavior. Research has also explored how proactive
+moderation tools like chat modes on Twitch [42] or post approvals
+on Facebook groups [38] can prevent anti-social behavior. Yet other
+work studied the effect of algorithmic flagging on Wikipedia using
+a sharp regression discontinuity design, finding that the system
+leads to more fair outcomes on the platform [46], although effects
+are heterogeneous across language editions with different charac-
+teristics [50]. At the platform level, previous work on the effects
+of content moderation has analyzed soft-moderation strategies,
+e.g., flagging news as misinformation [ 34, 43, 53], and the effect
+of deplatforming users and communities from mainstream plat-
+forms [5, 20, 25].
+Relationship between prior and present work. Prior work has
+studied online moderation, often in a descriptive fashion [ 4, 6, 9,
+12, 14, 24] or manual, community-oriented contexts [26, 38, 42, 44].
+Yet less is known about the impact of large-scale platform-level
+automated online moderation (a substantial fraction of moderation
+interventions carried online [16, 35, 48, 49]). Therefore, the results
+provided here advance the understanding of the effects of content
+moderation and clarify if and how automated systems deployed in
+a large online social network impact user behavior. Further, our
+work can help clarify whether rule-breaking behavior is contagious.
+Past work has typically relied on lab-based experimental settings
+to study the effect of rule-breaking or toxic content on subsequent
+comments [8, 19, 29, 39]. In contrast, here we examine the effect of
+removing or hiding rule-breaking content affects other users on a
+real social media platform, a setup with greater ecological validity.
+This work is not the first in using quasi-experimental methods to
+evaluate the impact of moderation interventions (e.g., [42, 44, 46]).
+However, approaches used in other work are not readily applicable
+to our scenario, e.g., they assume deterministic interventions [46]
+or a random interval until an intervention is applied [44]. Thus, we
+propose a fuzzy regression discontinuity approach to estimate the
+effect of automated moderation on user behavior. This approach
+could be easily adapted to assess how other automated moderation
+systems affect subsequent user behavior.

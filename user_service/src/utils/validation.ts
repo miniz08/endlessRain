@@ -100,8 +100,8 @@ export function normalizeRole(value: unknown): string | undefined {
   if (!role) return undefined;
 
   const normalized = role.toLowerCase();
-  if (!["user", "reviewer", "admin"].includes(normalized)) {
-    throw new HttpError(400, "role must be user, reviewer, or admin", "VALIDATION_ERROR");
+  if (!["user", "admin"].includes(normalized)) {
+    throw new HttpError(400, "role must be user or admin", "VALIDATION_ERROR");
   }
   return normalized;
 }

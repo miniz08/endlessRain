@@ -325,8 +325,8 @@ async function runBlackBox() {
   await caseRequest({ id: "BB-202", category: "users", name: "查看不存在用户", path: "/api/users/999999999", expectedStatus: 404 });
   await caseRequest({ id: "BB-203", category: "users", name: "用户搜索", path: `/api/users/search?q=${encodeURIComponent(bInput.username)}`, expectedStatus: 200, validate: (r) => Array.isArray(r.body?.items) });
   await caseRequest({ id: "BB-204", category: "users", name: "用户评分", path: `/api/users/${userBId}/rating`, expectedStatus: 200, validate: (r) => Boolean(r.body?.rating) });
-  await caseRequest({ id: "BB-205", category: "users", name: "普通用户修改角色被拒绝", client: userA, method: "PATCH", path: `/api/users/${userBId}/role`, body: { role: "reviewer" }, expectedStatus: 403 });
-  await caseRequest({ id: "BB-206", category: "users", name: "游客修改角色被拒绝", client: guest, method: "PATCH", path: `/api/users/${userBId}/role`, body: { role: "reviewer" }, expectedStatus: 401 });
+  await caseRequest({ id: "BB-205", category: "users", name: "普通用户修改角色被拒绝", client: userA, method: "PATCH", path: `/api/users/${userBId}/role`, body: { role: "admin" }, expectedStatus: 403 });
+  await caseRequest({ id: "BB-206", category: "users", name: "游客修改角色被拒绝", client: guest, method: "PATCH", path: `/api/users/${userBId}/role`, body: { role: "admin" }, expectedStatus: 401 });
   await adminCase({ id: "BB-207", category: "users", name: "管理员修改角色", client: admin, method: "PATCH", path: `/api/users/${userBId}/role`, body: { role: "user" }, expectedStatus: 200, validate: (r) => r.body?.user?.role === "user" });
 
   await caseRequest({ id: "BB-301", category: "articles", name: "游客访问文章列表", path: "/api/articles?limit=5", expectedStatus: 200, validate: (r) => Array.isArray(r.body?.items) });
