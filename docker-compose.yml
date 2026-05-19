@@ -62,6 +62,8 @@ services:
     environment:
       PORT: 3004
       DATABASE_URL: ${DATABASE_URL}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET:-longseason-dev-access-token-secret}
+      JWT_SECRET: ${JWT_SECRET:-longseason-dev-access-token-secret}
       AI_PROVIDER: ${AI_PROVIDER:-mock}
       AI_BASE_URL: ${AI_BASE_URL:-https://api.siliconflow.cn/v1}
       AI_CHAT_PATH: ${AI_CHAT_PATH:-/chat/completions}
