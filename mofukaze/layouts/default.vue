@@ -16,7 +16,7 @@
             通知
             <span v-if="unreadNotifications > 0" class="nav-badge">{{ unreadNotifications }}</span>
           </NuxtLink>
-          <NuxtLink v-if="isOperator" to="/ops">运维</NuxtLink>
+          <a v-if="isOperator" :href="opsHref">运维</a>
           <NuxtLink v-if="!user" to="/login">登录</NuxtLink>
           <NuxtLink v-if="!user" to="/register">注册</NuxtLink>
           <button v-else class="ghost" @click="logout">退出</button>
@@ -32,12 +32,24 @@
 <script setup lang="ts">
 const { blogApi } = useApi();
 const { user, refreshMe, logout } = useAuth();
+const config = useRuntimeConfig();
 const route = useRoute();
 const unreadNotifications = useState<number>("notifications:unread", () => 0);
 const siteSearch = ref("");
 const isOperator = computed(() => {
   const role = user.value?.role?.toLowerCase();
   return role === "admin";
+});
+const opsHref = computed(() => {
+  if (!import.meta.client) return "/ops";
+
+  const configuredPort = String(config.public.frontendPort || "800").trim();
+  const { protocol, hostname, port, origin } = window.location;
+  if (port || !configuredPort) return `${origin}/ops`;
+  if ((protocol === "http:" && configuredPort === "80") || (protocol === "https:" && configuredPort === "443")) {
+    return "/ops";
+  }
+  return `${protocol}//${hostname}:${configuredPort}/ops`;
 });
 
 watch(

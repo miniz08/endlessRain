@@ -6,6 +6,7 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE ?? "/api",
       wsBase: process.env.NUXT_PUBLIC_WS_BASE ?? "",
+      frontendPort: process.env.NUXT_PUBLIC_FRONTEND_PORT ?? process.env.FRONTEND_HTTP_PORT ?? "800",
     },
   },
   typescript: {
