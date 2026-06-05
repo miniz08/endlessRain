@@ -90,9 +90,14 @@ services:
       AI_BASE_URL: ${AI_BASE_URL:-https://api.siliconflow.cn/v1}
       AI_CHAT_PATH: ${AI_CHAT_PATH:-/chat/completions}
       AI_API_KEY: ${AI_API_KEY:-}
-      AI_MODEL: ${AI_MODEL:-Qwen/QwQ-32B}
+      AI_MODEL: ${AI_MODEL:-Qwen/Qwen2-7B-Instruct}
+      AI_PROVIDER_TARGETS: ${AI_PROVIDER_TARGETS:-}
       AI_TIMEOUT_MS: ${AI_TIMEOUT_MS:-20000}
       AI_RETRY_COUNT: ${AI_RETRY_COUNT:-1}
+      SILICONFLOW_API_KEY: ${SILICONFLOW_API_KEY:-}
+      ZHIPU_API_KEY: ${ZHIPU_API_KEY:-}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      QIANFAN_API_KEY: ${QIANFAN_API_KEY:-}
       AI_INTERNAL_TOKEN: ${AI_INTERNAL_TOKEN:-longseason-dev-ai-internal-token}
       CORS_ORIGIN: "true"
     ports:

@@ -302,6 +302,7 @@ textarea {
 .row,
 .tags,
 .reactions,
+.feedback-actions,
 .tabs {
   display: flex;
   align-items: center;

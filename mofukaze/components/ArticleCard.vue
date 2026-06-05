@@ -53,12 +53,42 @@
       </button>
       <span class="muted">共 {{ localReactions.total }}</span>
     </div>
+
+    <div v-if="isPublicArticle" class="feedback-actions" style="margin-top: 8px">
+      <button
+        class="ghost"
+        :class="{ primary: hasFeedback('FAVORITE') }"
+        :disabled="feedbackPending"
+        title="作为强正反馈写入推荐事件"
+        @click="recordFeedback('FAVORITE')"
+      >
+        {{ hasFeedback("FAVORITE") ? "已收藏" : "收藏" }}
+      </button>
+      <button
+        class="ghost"
+        :disabled="feedbackPending"
+        title="减少相似内容推荐"
+        @click="recordFeedback('HIDE')"
+      >
+        隐藏
+      </button>
+      <button
+        class="ghost"
+        :disabled="feedbackPending"
+        title="作为强负反馈写入推荐事件"
+        @click="recordFeedback('REPORT')"
+      >
+        举报
+      </button>
+    </div>
   </article>
 </template>
 
 <script setup lang="ts">
 import type { Article } from "~/types/social";
 import { REACTION_EMOJIS } from "~/utils/reactionEmojis";
+
+type FeedbackEventType = "FAVORITE" | "HIDE" | "REPORT";
 
 const props = defineProps<{
   article: Article;
@@ -67,12 +97,15 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   updated: [];
+  feedback: [payload: { articleId: number; eventType: FeedbackEventType }];
 }>();
 
 const { isLoggedIn } = useAuth();
 const { blogApi } = useApi();
 const visibleEmojis = REACTION_EMOJIS.slice(0, 8);
 const localReactions = ref(props.article.reactions);
+const feedbackPending = ref(false);
+const recordedFeedback = ref<FeedbackEventType[]>([]);
 const isPublicArticle = computed(() => props.article.status === "PUBLISHED" || props.article.status === "LOW_PRIORITY");
 const visibleTags = computed(() => {
   const seen = new Set([props.article.tag]);
@@ -107,6 +140,33 @@ async function toggleReaction(emoji: string) {
   });
   localReactions.value = payload.summary;
   emit("updated");
+}
+
+function hasFeedback(eventType: FeedbackEventType) {
+  return recordedFeedback.value.includes(eventType);
+}
+
+async function recordFeedback(eventType: FeedbackEventType) {
+  if (!isLoggedIn.value) {
+    await navigateTo("/login");
+    return;
+  }
+  if (feedbackPending.value || hasFeedback(eventType)) return;
+  feedbackPending.value = true;
+  try {
+    await blogApi("/reco/events", {
+      method: "POST",
+      body: {
+        articleId: props.article.id,
+        eventType,
+        scene: "article_feedback",
+      },
+    });
+    recordedFeedback.value = [...recordedFeedback.value, eventType];
+    emit("feedback", { articleId: props.article.id, eventType });
+  } finally {
+    feedbackPending.value = false;
+  }
 }
 
 function formatTime(value: string) {

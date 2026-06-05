@@ -42,7 +42,6 @@ export function optionalAuth(req: Request, _res: Response, next: NextFunction): 
       };
     }
   } catch {
-    // AI service allows internal calls without user context; invalid auth is ignored here.
   }
 
   next();

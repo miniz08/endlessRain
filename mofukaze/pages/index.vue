@@ -13,7 +13,14 @@
         <div v-if="error" class="panel error">{{ error }}</div>
         <div v-else-if="loading" class="panel empty">加载中</div>
         <div v-else-if="articles.length === 0" class="panel empty">暂无内容</div>
-        <ArticleCard v-for="article in articles" v-else :key="article.id" :article="article" compact />
+        <ArticleCard
+          v-for="article in articles"
+          v-else
+          :key="article.id"
+          :article="article"
+          compact
+          @feedback="handleArticleFeedback"
+        />
 
         <button v-if="nextCursor" class="primary" :disabled="loadingMore" @click="loadMore">
           {{ loadingMore ? "加载中" : "加载更多" }}
@@ -84,6 +91,10 @@
 import type { Article, CreateArticleResponse, FeedResponse } from "~/types/social";
 
 type FeedType = "recommended" | "following";
+type ArticleFeedback = {
+  articleId: number;
+  eventType: "FAVORITE" | "HIDE" | "REPORT";
+};
 type RecoProfile = {
   userId: number;
   tagVector: {
@@ -212,6 +223,15 @@ function handleArticleCreated(payload: CreateArticleResponse) {
   if (payload.article.status !== "PUBLISHED" && payload.article.status !== "LOW_PRIORITY") return;
   articles.value = [payload.article, ...articles.value.filter((article) => article.id !== payload.article.id)];
   activeFeed.value = "recommended";
+}
+
+async function handleArticleFeedback(payload: ArticleFeedback) {
+  if (payload.eventType === "HIDE" || payload.eventType === "REPORT") {
+    articles.value = articles.value.filter((article) => article.id !== payload.articleId);
+  }
+  if (user.value) {
+    await loadProfile();
+  }
 }
 
 function formatTime(value: string) {
